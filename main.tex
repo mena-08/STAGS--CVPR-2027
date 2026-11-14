@@ -45,18 +45,21 @@ First line of institution2 address\\
 
 \begin{document}
 \maketitle
-\input{fig/teaser}
-\input{sec/0_abstract}    
+{\draftblue\input{fig/teaser}}
+\input{sec/0_abstract}
+\draftblue
 \input{sec/1_intro}
-\input{sec/2_formatting}
-\input{sec/3_finalcopy}
+\input{sec/2_related}
+\input{sec/3_method}
+\input{sec/4_results}
+\input{sec/5_discussion}
 {
     \small
     \bibliographystyle{ieeenat_fullname}
     \bibliography{main}
 }
 
-% WARNING: do not forget to delete the supplementary pages from your submission 
-% \input{sec/X_suppl}
+% Supplementary material is compiled into the draft for review; remove it from the main submission PDF.
+\input{sec/X_suppl}
 
 \end{document}

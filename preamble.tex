@@ -1,6 +1,20 @@
 %% This file contains a number of tweaks that are typically applied to the main document.
 %% They are not enabled by default, but can be enabled by uncommenting the relevant lines.
 
+%%
+%% Packages used by the STAGS draft (cvpr.sty already loads xcolor, graphicx, amsmath, amssymb, booktabs,
+%% natbib, etoolbox, caption, subcaption, cleveref and enumitem).
+%%
+\usepackage{bm}
+\usepackage{multirow}
+\usepackage{siunitx}
+
+%%
+%% Draft marking: every addition after the (final) abstract is set in blue, including floats, captions,
+%% tables and the bibliography. \normalcolor is redefined because LaTeX resets floats to it.
+%%
+\newcommand{\draftblue}{\color{blue}\renewcommand{\normalcolor}{\color{blue}}}
+
 
 %%
 %% Official support for 2-column teaser figure

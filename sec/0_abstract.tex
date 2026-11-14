@@ -1,7 +1,7 @@
 \begin{abstract}
 Subtomogram averaging (STA) recovers high-resolution structures from cryo-electron tomograms by aligning and averaging thousands of noisy particle copies, but current pipelines alternate exhaustive pose searches with voxel reconstructions over many hours to days.
 We present STAGS, a subtomogram averaging method that represents the structure as a single set of 3D Gaussians fitted directly to the raw tilt images.
-Because the projection of a Gaussian is analytic, one fused GPU renderer drives every stage of the pipeline: global and local pose search through slices of the model's closed-form Fourier transform, coarse-to-fine map fitting with resolution-adaptive densification, and gradient-based polishing of tilt geometry and per-particle motion, where each correction is retained only if it reproduces across independent half-sets.
-Starting from the same inputs as established pipelines, STAGS matches their resolution on a standard cryo-ET benchmark in a fraction of the reported processing time.
+Because the projection of a Gaussian is analytic, one fused GPU renderer drives every stage of the pipeline: global and local pose search through slices of the model's closed-form Fourier transform, coarse-to-fine map fitting with resolution-adaptive densification, and gradient-based polishing of tilt geometry and per-particle motion, \textcolor{blue}{restricted to corrections that reproduce across independent half-sets}.
+Starting from \textcolor{blue}{the same particles and preprocessing as RELION-5}, STAGS matches \textcolor{blue}{its} resolution on a standard cryo-ET benchmark in a fraction of the reported processing time.
 With poses fixed, fitting Gaussians to the tilt images yields better maps than voxel reconstruction at equal particle counts on held-out tomograms, and a map-only control attributes the gain to the image-level fit.
 \end{abstract}

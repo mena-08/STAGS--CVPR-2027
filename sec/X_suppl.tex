@@ -2,16 +2,113 @@
 \setcounter{page}{1}
 \maketitlesupplementary
 
+\input{sec/X_suppl_method}
 
-\section{Rationale}
-\label{sec:rationale}
-% 
-Having the supplementary compiled together with the main paper means that:
-% 
-\begin{itemize}
-\item The supplementary can back-reference sections of the main paper, for example, we can refer to \cref{sec:intro};
-\item The main paper can forward reference sub-sections within the supplementary explicitly (e.g. referring to a particular experiment); 
-\item When submitted to arXiv, the supplementary will already included at the end of the paper.
-\end{itemize}
-% 
-To split the supplementary pages from the main paper, you can use \href{https://support.apple.com/en-ca/guide/preview/prvw11793/mac#:~:text=Delete%20a%20page%20from%20a,or%20choose%20Edit%20%3E%20Delete).}{Preview (on macOS)}, \href{https://www.adobe.com/acrobat/how-to/delete-pages-from-pdf.html#:~:text=Choose%20%E2%80%9CTools%E2%80%9D%20%3E%20%E2%80%9COrganize,or%20pages%20from%20the%20file.}{Adobe Acrobat} (on all OSs), as well as \href{https://superuser.com/questions/517986/is-it-possible-to-delete-some-pages-of-a-pdf-document}{command line tools}.
+\section{Evaluation details}
+\label{sec:suppl:eval}
+
+The atomic model 5L93 is registered rigidly once, at 40--20\,\AA\ against RELION's merged map, and the same transform is used for every map.
+% src: docs/results-stags-next-evaluation.md (model validation: registration 40-20 A, shared by every method)
+Crossings are the first downward crossing between adjacent valid shells, linearly interpolated in frequency; the band mean over 3.6--3.28\,\AA\ weights the eight native shells equally.
+% src: runs/engine/pose_abc_adopt_20261113/blind/comparison.json (crossing_definition, band_definition)
+STAGS's own two half maps share structure at 3.3--3.5\,\AA\ that RELION's maps do not contain (shared Gaussian texture or shared pose bias, not yet separated), which is why their mutual FSC is not used as a resolution estimate.
+% src: docs/final-campaign-nov13.md (swap diagnostic: own gold FSC 0.45 at 3.5 A vs cross-FSC 0.22/0.19)
+The fresh run used the same picks, ladder, budgets and stopping rule as the earlier run~E; besides the three pose corrections, 14 source or configuration files differ from run~E, so the difference between the two runs (0.074/0.145\,\AA\ in crossing, 0.036/0.052 in band mean) is not a clean ablation.
+% src: docs/final-campaign-nov13.md (Fresh-run launch verification: fourteen hashes differ); runs/engine/pose_abc_adopt_20261113/completion_review.json (gain_vs_E_crossing_A, gain_vs_E_band_mean)
+
+\section{Additional comparison with RELION-5}
+\label{sec:suppl:visual}
+
+\Cref{fig:views} shows both maps rendered identically and \cref{fig:slices} central sections without masking.
+In the local-resolution comparison of \cref{fig:locres}, 73\,\% (RELION-5) and 83\,\% (STAGS) of the window centers inside the mask are finer than 3.5\,\AA.
+% src: docs/paper/fig_abc_provenance.json (local_resolution.summary: fraction_finer_than_3_5A relion 0.7336, stags 0.8310)
+
+\input{fig/fig_views}
+\input{fig/fig_slices}
+
+\section{Pose-correction ablation}
+\label{sec:suppl:ablation}
+
+\input{fig/tab_ablation}
+
+\Cref{tab:ablation} tests three pose corrections, each in a matched one-cycle continuation from the frozen final state of run~E: (a)~exact Fourier-phase scoring of the final translation refinement, replacing bilinear interpolation, which drifts by 0.63\,\AA\ on known-answer fixtures where exact scoring drifts by 0.0002\,\AA; (b)~a masked Gaussian reference for the local pose search, with matching subtraction outside the mask; (c)~separate per-particle static translations and shared motion in polishing.
+% src: docs/final-campaign-nov13.md (Step 1 recovery: 0.632614/0.625859 vs 0.000217/0.000210 A); runs/engine/posefix_20261113/recovery/report.json
+The predeclared gate required a gain above 0.03\,\AA\ on each half, against both the continuation control and the frozen state, with no worse atomic agreement.
+% src: engine_rules.json steps.posefix_20261113; docs/final-campaign-nov13.md (Frozen-E pose correction)
+Alone, each change gains at most 0.021\,\AA; together they gain 0.082\,\AA\ on half~1 but only 0.015\,\AA\ on half~2, so the combination failed the gate.
+% src: runs/engine/posefix_20261113/{a,b,c,abc}/result.json
+Exact scoring inside the rotation-candidate ranking, evaluating every candidate, did not improve on the combination (0.064/0.013\,\AA) and was not adopted.
+% src: runs/engine/pose_rank_exact_20261113/abc_exactrank/result.json; decision.json (blind_authorized=false)
+We adopted the combination for the fresh run \emph{after} seeing these results: its mean FSC over 3.6--3.28\,\AA\ rose on both halves (+0.016/+0.017), its curves exceed the control's at every shell of that band, and its atomic agreement improved.
+% src: docs/final-campaign-nov13.md (Explicit post-result adoption: +0.016170/+0.017196); runs/engine/pose_rank_exact_20261113/curve_diagnosis.json
+The failed gate is not reclassified, and the selection after the result is part of why the benchmark is a development result rather than independent validation.
+
+\section{Fixed-pose particle efficiency: details}
+\label{sec:suppl:efficiency}
+
+\paragraph{Withheld-tomogram study.}
+The three splits withhold TS\_54, TS\_03 and TS\_45; the 250 training particles are drawn from the other four tomograms and 200 particles of the withheld tomogram are used only for image prediction.
+% src: runs/native_limited250_20261103/selection.json (train TS_01/03/43/45; 250 train; 200 held out); docs/stags-limited-particle-study-matrix.md
+The Gaussian map (48,000 Gaussians, 2,667 updates of 6 particles) is fitted to RELION's extracted particle images at 1.5$\times$ binning, with density outside the mask subtracted using a voxel map of the same 250 particles.
+% src: engine_rules.json steps.A3_break_fixed_point.snr_gate.what; runs/step2_parity_20261103/score_primary/results.json (endpoint.recipe_differences)
+It passes the predeclared margin of +0.01 FSC in every split, and its 5L93 crossing is slightly finer (7.08, 7.03, 7.05\,\AA\ against 7.23, 7.05, 7.16\,\AA).
+% src: docs/results-limited250-three-study-20261103.md
+The study's predeclared Gaussian arms (ray and wave models fitted to raw images at native sampling) failed against the voxel baseline (0.243 and 0.248 against 0.509); the reported recipe is an earlier one, substituted after that failure and scored under the same frozen gates.
+% src: docs/results-limited250-primary-20261103.md
+RELION-5 with 500 particles is better in all three splits (0.620, 0.601, 0.582), so the gain is not a halving of the particle count.
+Image prediction on the withheld tomogram favors the Gaussian map (normalized squared error 0.99998 against 1.00074 in the first split), but an untrained Gaussian initialization already reaches most of that difference, and all methods explain almost none of the held-out signal.
+% src: runs/native_limited250_20261103/native500_score/results.json (loss_over_observed_power); docs/results-limited250-primary-20261103.md (zero-update 0.99999)
+All maps are scored against RELION's half-2 map, refined with the same poses, so the comparison is conditional on them.
+
+\paragraph{Map-only control.}
+The control fits the image-fit recipe's Gaussian initialization and schedule to the 250-particle voxel map.
+% src: runs/native_limited250_20261103/control_v4_rules.json
+It ran once, in the first split, without an adequacy gate, and scores 0.508 against 0.509 for the voxel map and 0.570 for the image-fitted Gaussians; its 5L93 crossing is much coarser (15.6\,\AA).
+% src: runs/native_limited250_20261103/control_v4_outcome.json; map_only_control_v4/score/results.json
+Three earlier versions failed the study's predeclared adequacy requirement, a relative $L_2$ error below 0.10 against the voxel map (1.15, 0.88 and 0.96); the 250-particle map is noise-dominated beyond 8\,\AA\ (97\,\% of its power), so a representation that does not copy its noise cannot meet that requirement.
+% src: runs/native_limited250_20261103/map_only_control/decision.json (1.1506); controls_v2_outcome.json (0.883); control_v3_outcome.json (0.956; power beyond 8 A 0.973)
+The control therefore supports, but does not prove, attributing the gain to the image-level fit.
+
+\paragraph{Five-draw study.}
+Five disjoint draws of 250 half-1 particles (nested in 500) with 200 further particles reserved compare raw-image Gaussian fits with a matched ridge-regularized voxel solver and with Gaussians fitted to each voxel-250 map.
+% src: docs/results-stags-next-evaluation.md (particle-efficiency study)
+Over 6.5--5.6\,\AA\ the Gaussian map exceeds the voxel-250 map by 0.175 (95\,\% CI [0.146, 0.203]) and the map-only fit by 0.137 [0.105, 0.169], and at 6.5\,\AA\ the voxel-500 map by 0.095 [0.064, 0.125].
+% src: runs/particle_efficiency_20261102/results.json (comparisons A250, AG250, A500)
+The map-only fits approximate their targets with a relative $L_2$ error of 0.98, so they are not an adequate smoothing control, and the Gaussian map predicts the reserved particles' images worse than the voxel-500 map in all five draws.
+% src: runs/particle_efficiency_20261102/draw*/AG250/results.json (relative_map_l2 0.9789-0.9802); docs/results-stags-next-evaluation.md (reserved-particle prediction)
+
+\section{Pipeline stage decisions}
+\label{sec:suppl:part2}
+
+Before the pose corrections of \cref{sec:suppl:ablation}, each stage of the pipeline was revisited with a predeclared keep rule on a short proxy: a cold map fit from the stage's output, or one refinement cycle, scored as in \cref{sec:results:setup}.
+\Cref{tab:part2} lists every tested change.
+The proxies have a noise floor of about $\pm$0.02--0.03\,\AA, visible as gains of opposite sign on the two halves.
+% src: docs/final-campaign-nov13.md (Part 2, stage2_fit note: proxy noise floor)
+Two decisions were revised after their results and are marked as such: the coarse-to-fine schedule stops at 5.5\,\AA\ (saving 58\,min) although the rule rejected it on half~2 by 0.032\,\AA, after a later fresh run with that stop gave a better proxy (3.881/3.886\,\AA) and the spread between runs was seen to be about 0.1\,\AA; and the revised optics scan was kept although its one-cycle proxy was within noise, because the previous scan failed a known-answer test (median defocus offset 225\,\AA\ recovered for a true 400\,\AA, against 397\,\AA\ for the revised scan) and the revised scan roughly halves the defocus deviation from RELION's refined values (median 118/141\,\AA\ against 221/217\,\AA).
+% src: docs/final-campaign-nov13.md (stage1_ladder caveat_recorded_after and decision_revised_after; stage4_scan known_answer_h1, relion_diagnostic, DEVIATION recorded after the result)
+
+\begin{table}[h]
+\centering
+\resizebox{\linewidth}{!}{%
+\begin{tabular}{@{}llccl@{}}
+\toprule
+Stage & Change & Proxy (\AA) & Reference (\AA) & Decision \\
+& & half 1 / half 2 & half 1 / half 2 & \\
+\midrule
+% src: docs/final-campaign-nov13.md (Part 2: stage1_ladder)
+Schedule & stop at 5.5\,\AA\ ($-58$\,min) & 3.907 / 4.041 & 3.924 / 4.009 & reject; kept after result \\
+% src: docs/final-campaign-nov13.md (Part 2: stage2_fit)
+Map fit & fit band ends at 3.0\,\AA & 3.948 / 3.993 & 3.924 / 4.009 & reject \\
+% src: docs/final-campaign-nov13.md (Part 2: stage3_p2 outcome)
+Pose search & posterior mean, 4 rounds, FSC-weighted reference & 3.903 / 3.821 & 3.580 / 3.639 & reject \\
+& top-8 mean, 3 rounds & 3.608 / 3.659 & 3.580 / 3.639 & reject \\
+& posterior mean, 3 rounds, no weighting & 3.642 / 3.655 & 3.580 / 3.639 & reject \\
+% src: docs/final-campaign-nov13.md (Part 2: stage4_scan proxy)
+Optics scan & 384\,px raw, priors, every cycle ($+7.4$\,min) & 3.600 / 3.582 & 3.595 / 3.572 & reject; kept after result \\
+% src: docs/final-campaign-nov13.md (Part 2: stage5_p1)
+Polishing & damped motion model, capped steps ($-8$\,min) & 3.566 / 3.430 & 3.579 / 3.455 & keep \\
+\bottomrule
+\end{tabular}}
+\caption{\textbf{Stage-by-stage decisions} (cross-FSC 0.143 crossings of the proxy and of its reference, lower is better). ``Kept after result'' marks decisions revised after the proxy was observed; the reasons are given in the text.}
+\label{tab:part2}
+\end{table}

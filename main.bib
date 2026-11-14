@@ -57,55 +57,551 @@
 @String(CSVT = {IEEE TCSVT})
 
 
+% ---------------------------------------------------------------------------
+% STAGS references. Every entry was checked against Crossref, Europe PMC,
+% arXiv or the NeurIPS proceedings on 2026-11-14 (DOI or arXiv id given).
+% ---------------------------------------------------------------------------
 
-@misc{Authors14,
- author = {FirstName LastName},
- title = {The frobnicatable foo filter},
- note = {Face and Gesture submission ID 324. Supplied as supplemental material {\tt fg324.pdf}},
- year = 2014
+% --- Subtomogram averaging and cryo-ET software ----------------------------
+
+@article{burt2024relion5,
+  author  = {Burt, Alister and Toader, Bogdan and Warshamanage, Rangana and von K{\"u}gelgen, Andriko and Pyle, Euan and Zivanov, Jasenko and Kimanius, Dari and Bharat, Tanmay A. M. and Scheres, Sjors H. W.},
+  title   = {An image processing pipeline for electron cryo-tomography in {RELION}-5},
+  journal = {FEBS Open Bio},
+  volume  = {14},
+  number  = {11},
+  pages   = {1788--1804},
+  year    = {2024},
+  doi     = {10.1002/2211-5463.13873}
 }
 
-@misc{Authors14b,
- author = {FirstName LastName},
- title = {Frobnication tutorial},
- note = {Supplied as supplemental material {\tt tr.pdf}},
- year = 2014
+@article{zivanov2022relion4,
+  author  = {Zivanov, Jasenko and Ot{\'o}n, Joaqu{\'\i}n and Ke, Zunlong and von K{\"u}gelgen, Andriko and Pyle, Euan and Qu, Kun and Morado, Dustin and Casta{\~n}o-D{\'\i}ez, Daniel and Zanetti, Giulia and Bharat, Tanmay A. M. and Briggs, John A. G. and Scheres, Sjors H. W.},
+  title   = {A {B}ayesian approach to single-particle electron cryo-tomography in {RELION}-4.0},
+  journal = {eLife},
+  volume  = {11},
+  pages   = {e83724},
+  year    = {2022},
+  doi     = {10.7554/eLife.83724}
 }
 
-@article{Alpher02,
-author = {FirstName Alpher},
-title = {Frobnication},
-journal = PAMI,
-volume = 12,
-number = 1,
-pages = {234--778},
-year = 2002
+@article{bharat2016relion,
+  author  = {Bharat, Tanmay A. M. and Scheres, Sjors H. W.},
+  title   = {Resolving macromolecular structures from electron cryo-tomography data using subtomogram averaging in {RELION}},
+  journal = {Nature Protocols},
+  volume  = {11},
+  number  = {11},
+  pages   = {2054--2065},
+  year    = {2016},
+  doi     = {10.1038/nprot.2016.124}
 }
 
-@article{Alpher03,
-author = {FirstName Alpher and  FirstName Fotheringham-Smythe},
-title = {Frobnication revisited},
-journal = {Journal of Foo},
-volume = 13,
-number = 1,
-pages = {234--778},
-year = 2003
+@article{scheres2012relion,
+  author  = {Scheres, Sjors H. W.},
+  title   = {{RELION}: Implementation of a {B}ayesian approach to cryo-{EM} structure determination},
+  journal = {Journal of Structural Biology},
+  volume  = {180},
+  number  = {3},
+  pages   = {519--530},
+  year    = {2012},
+  doi     = {10.1016/j.jsb.2012.09.006}
 }
 
-@article{Alpher04,
-author = {FirstName Alpher and FirstName Fotheringham-Smythe and FirstName Gamow},
-title = {Can a machine frobnicate?},
-journal = {Journal of Foo},
-volume = 14,
-number = 1,
-pages = {234--778},
-year = 2004
+@article{tegunov2021m,
+  author  = {Tegunov, Dimitry and Xue, Liang and Dienemann, Christian and Cramer, Patrick and Mahamid, Julia},
+  title   = {Multi-particle cryo-{EM} refinement with {M} visualizes ribosome-antibiotic complex at 3.5~{\AA} in cells},
+  journal = {Nature Methods},
+  volume  = {18},
+  number  = {2},
+  pages   = {186--193},
+  year    = {2021},
+  doi     = {10.1038/s41592-020-01054-7}
 }
 
-@inproceedings{Alpher05,
-author = {FirstName Alpher and FirstName Gamow},
-title = {Can a computer frobnicate?},
-booktitle = CVPR,
-pages = {234--778},
-year = 2005
+@article{tegunov2019warp,
+  author  = {Tegunov, Dimitry and Cramer, Patrick},
+  title   = {Real-time cryo-electron microscopy data preprocessing with {Warp}},
+  journal = {Nature Methods},
+  volume  = {16},
+  number  = {11},
+  pages   = {1146--1152},
+  year    = {2019},
+  doi     = {10.1038/s41592-019-0580-y}
+}
+
+@article{castanodiez2012dynamo,
+  author  = {Casta{\~n}o-D{\'\i}ez, Daniel and Kudryashev, Mikhail and Arheit, Marcel and Stahlberg, Henning},
+  title   = {{Dynamo}: A flexible, user-friendly development tool for subtomogram averaging of cryo-{EM} data in high-performance computing environments},
+  journal = {Journal of Structural Biology},
+  volume  = {178},
+  number  = {2},
+  pages   = {139--151},
+  year    = {2012},
+  doi     = {10.1016/j.jsb.2011.12.017}
+}
+
+@article{himes2018emclarity,
+  author  = {Himes, Benjamin A. and Zhang, Peijun},
+  title   = {{emClarity}: software for high-resolution cryo-electron tomography and subtomogram averaging},
+  journal = {Nature Methods},
+  volume  = {15},
+  number  = {11},
+  pages   = {955--961},
+  year    = {2018},
+  doi     = {10.1038/s41592-018-0167-z}
+}
+
+@article{chen2019eman2,
+  author  = {Chen, Muyuan and Bell, James M. and Shi, Xiaodong and Sun, Stella Y. and Wang, Zhao and Ludtke, Steven J.},
+  title   = {A complete data processing workflow for cryo-{ET} and subtomogram averaging},
+  journal = {Nature Methods},
+  volume  = {16},
+  number  = {11},
+  pages   = {1161--1168},
+  year    = {2019},
+  doi     = {10.1038/s41592-019-0591-8}
+}
+
+@article{nicastro2006peet,
+  author  = {Nicastro, Daniela and Schwartz, Cindi and Pierson, Jason and Gaudette, Richard and Porter, Mary E. and McIntosh, J. Richard},
+  title   = {The molecular architecture of axonemes revealed by cryoelectron tomography},
+  journal = {Science},
+  volume  = {313},
+  number  = {5789},
+  pages   = {944--948},
+  year    = {2006},
+  doi     = {10.1126/science.1128618}
+}
+
+@article{hrabe2012pytom,
+  author  = {Hrabe, Thomas and Chen, Yuxiang and Pfeffer, Stefan and Kuhn Cuellar, Luis and Mangold, Ann-Victoria and F{\"o}rster, Friedrich},
+  title   = {{PyTom}: A python-based toolbox for localization of macromolecules in cryo-electron tomograms and subtomogram analysis},
+  journal = {Journal of Structural Biology},
+  volume  = {178},
+  number  = {2},
+  pages   = {177--188},
+  year    = {2012},
+  doi     = {10.1016/j.jsb.2011.12.003}
+}
+
+@article{liu2023nextpyp,
+  author  = {Liu, Hsuan-Fu and Zhou, Ye and Huang, Qinwen and Piland, Jonathan and Jin, Weisheng and Mandel, Justin and Du, Xiaochen and Martin, Jeffrey and Bartesaghi, Alberto},
+  title   = {{nextPYP}: a comprehensive and scalable platform for characterizing protein variability in situ using single-particle cryo-electron tomography},
+  journal = {Nature Methods},
+  volume  = {20},
+  number  = {12},
+  pages   = {1909--1919},
+  year    = {2023},
+  doi     = {10.1038/s41592-023-02045-0}
+}
+
+@article{wan2024stopgap,
+  author  = {Wan, William and Khavnekar, Sagar and Wagner, Jonathan},
+  title   = {{STOPGAP}: an open-source package for template matching, subtomogram alignment and classification},
+  journal = {Acta Crystallographica Section D: Structural Biology},
+  volume  = {80},
+  number  = {5},
+  pages   = {336--349},
+  year    = {2024},
+  doi     = {10.1107/S205979832400295X}
+}
+
+@article{nickell2005tom,
+  author  = {Nickell, Stephan and F{\"o}rster, Friedrich and Linaroudis, Alexandros and Del Net, William and Beck, Florian and Hegerl, Reiner and Baumeister, Wolfgang and Plitzko, J{\"u}rgen M.},
+  title   = {{TOM} software toolbox: acquisition and analysis for electron tomography},
+  journal = {Journal of Structural Biology},
+  volume  = {149},
+  number  = {3},
+  pages   = {227--234},
+  year    = {2005},
+  doi     = {10.1016/j.jsb.2004.10.006}
+}
+
+@article{forster2005av3,
+  author  = {F{\"o}rster, Friedrich and Medalia, Ohad and Zauberman, Nathan and Baumeister, Wolfgang and Fass, Deborah},
+  title   = {Retrovirus envelope protein complex structure in situ studied by cryo-electron tomography},
+  journal = {Proceedings of the National Academy of Sciences},
+  volume  = {102},
+  number  = {13},
+  pages   = {4729--4734},
+  year    = {2005},
+  doi     = {10.1073/pnas.0409178102}
+}
+
+@article{chen2026tiltrefine,
+  author  = {Chen, Muyuan},
+  title   = {Gradient based refinement of {CryoET} tilt series alignment improves tomogram contrast and structure resolution},
+  journal = {bioRxiv},
+  year    = {2026},
+  doi     = {10.64898/2026.01.16.699989},
+  note    = {Preprint}
+}
+
+@article{turonova2017novactf,
+  author  = {Turo{\v{n}}ov{\'a}, Beata and Schur, Florian K. M. and Wan, William and Briggs, John A. G.},
+  title   = {Efficient {3D-CTF} correction for cryo-electron tomography using {NovaCTF} improves subtomogram averaging resolution to 3.4~{\AA}},
+  journal = {Journal of Structural Biology},
+  volume  = {199},
+  number  = {3},
+  pages   = {187--195},
+  year    = {2017},
+  doi     = {10.1016/j.jsb.2017.07.007}
+}
+
+@article{kremer1996imod,
+  author  = {Kremer, James R. and Mastronarde, David N. and McIntosh, J. Richard},
+  title   = {Computer visualization of three-dimensional image data using {IMOD}},
+  journal = {Journal of Structural Biology},
+  volume  = {116},
+  number  = {1},
+  pages   = {71--76},
+  year    = {1996},
+  doi     = {10.1006/jsbi.1996.0013}
+}
+
+@article{zheng2022aretomo,
+  author  = {Zheng, Shawn and Wolff, Georg and Greenan, Garrett and Chen, Zhen and Faas, Frank G. A. and B{\'a}rcena, Montserrat and Koster, Abraham J. and Cheng, Yifan and Agard, David A.},
+  title   = {{AreTomo}: An integrated software package for automated marker-free, motion-corrected cryo-electron tomographic alignment and reconstruction},
+  journal = {Journal of Structural Biology: X},
+  volume  = {6},
+  pages   = {100068},
+  year    = {2022},
+  doi     = {10.1016/j.yjsbx.2022.100068}
+}
+
+% --- Single-particle cryo-EM methods, validation and data -------------------
+
+@article{zivanov2019polishing,
+  author  = {Zivanov, Jasenko and Nakane, Takanori and Scheres, Sjors H. W.},
+  title   = {A {B}ayesian approach to beam-induced motion correction in cryo-{EM} single-particle analysis},
+  journal = {IUCrJ},
+  volume  = {6},
+  number  = {1},
+  pages   = {5--17},
+  year    = {2019},
+  doi     = {10.1107/S205225251801463X}
+}
+
+@article{punjani2017cryosparc,
+  author  = {Punjani, Ali and Rubinstein, John L. and Fleet, David J. and Brubaker, Marcus A.},
+  title   = {{cryoSPARC}: algorithms for rapid unsupervised cryo-{EM} structure determination},
+  journal = {Nature Methods},
+  volume  = {14},
+  number  = {3},
+  pages   = {290--296},
+  year    = {2017},
+  doi     = {10.1038/nmeth.4169}
+}
+
+@article{rosenthal2003fsc,
+  author  = {Rosenthal, Peter B. and Henderson, Richard},
+  title   = {Optimal determination of particle orientation, absolute hand, and contrast loss in single-particle electron cryomicroscopy},
+  journal = {Journal of Molecular Biology},
+  volume  = {333},
+  number  = {4},
+  pages   = {721--745},
+  year    = {2003},
+  doi     = {10.1016/j.jmb.2003.07.013}
+}
+
+@article{chen2013highres,
+  author  = {Chen, Shaoxia and McMullan, Greg and Faruqi, Abdul R. and Murshudov, Garib N. and Short, Judith M. and Scheres, Sjors H. W. and Henderson, Richard},
+  title   = {High-resolution noise substitution to measure overfitting and validate resolution in {3D} structure determination by single particle electron cryomicroscopy},
+  journal = {Ultramicroscopy},
+  volume  = {135},
+  pages   = {24--35},
+  year    = {2013},
+  doi     = {10.1016/j.ultramic.2013.06.004}
+}
+
+@article{grant2015dose,
+  author  = {Grant, Timothy and Grigorieff, Nikolaus},
+  title   = {Measuring the optimal exposure for single particle cryo-{EM} using a 2.6~{\AA} reconstruction of rotavirus {VP6}},
+  journal = {eLife},
+  volume  = {4},
+  pages   = {e06980},
+  year    = {2015},
+  doi     = {10.7554/eLife.06980}
+}
+
+@article{schur2016hiv,
+  author  = {Schur, Florian K. M. and Obr, Martin and Hagen, Wim J. H. and Wan, William and Jakobi, Arjen J. and Kirkpatrick, Joanna M. and Sachse, Carsten and Kr{\"a}usslich, Hans-Georg and Briggs, John A. G.},
+  title   = {An atomic model of {HIV-1} capsid-{SP1} reveals structures regulating assembly and maturation},
+  journal = {Science},
+  volume  = {353},
+  number  = {6298},
+  pages   = {506--508},
+  year    = {2016},
+  doi     = {10.1126/science.aaf9620}
+}
+
+@article{iudin2023empiar,
+  author  = {Iudin, Andrii and Korir, Paul K. and Somasundharam, Sriram and Weyand, Simone and Cattavitello, Cesare and Fonseca, Neli and Salih, Osman and Kleywegt, Gerard J. and Patwardhan, Ardan},
+  title   = {{EMPIAR}: the {E}lectron {M}icroscopy {P}ublic {I}mage {A}rchive},
+  journal = {Nucleic Acids Research},
+  volume  = {51},
+  number  = {D1},
+  pages   = {D1503--D1511},
+  year    = {2023},
+  doi     = {10.1093/nar/gkac1062}
+}
+
+% --- Learned and continuous representations -------------------------------
+
+@article{zhong2021cryodrgn,
+  author  = {Zhong, Ellen D. and Bepler, Tristan and Berger, Bonnie and Davis, Joseph H.},
+  title   = {{CryoDRGN}: reconstruction of heterogeneous cryo-{EM} structures using neural networks},
+  journal = {Nature Methods},
+  volume  = {18},
+  number  = {2},
+  pages   = {176--185},
+  year    = {2021},
+  doi     = {10.1038/s41592-020-01049-4}
+}
+
+@inproceedings{zhong2021cryodrgn2,
+  author    = {Zhong, Ellen D. and Lerer, Adam and Davis, Joseph H. and Berger, Bonnie},
+  title     = {{CryoDRGN2}: Ab initio neural reconstruction of {3D} protein structures from real cryo-{EM} images},
+  booktitle = {ICCV},
+  pages     = {4046--4055},
+  year      = {2021},
+  doi       = {10.1109/ICCV48922.2021.00403}
+}
+
+@inproceedings{levy2022cryoai,
+  author    = {Levy, Axel and Poitevin, Fr{\'e}d{\'e}ric and Martel, Julien and Nashed, Youssef and Peck, Ariana and Miolane, Nina and Ratner, Daniel and Dunne, Mike and Wetzstein, Gordon},
+  title     = {{CryoAI}: Amortized inference of poses for ab initio reconstruction of {3D} molecular volumes from real cryo-{EM} images},
+  booktitle = {ECCV},
+  pages     = {540--557},
+  year      = {2022},
+  doi       = {10.1007/978-3-031-19803-8_32}
+}
+
+@article{rangan2024cryodrgnet,
+  author  = {Rangan, Ramya and Feathers, Ryan and Khavnekar, Sagar and Lerer, Adam and Johnston, Jake D. and Kelley, Ron and Obr, Martin and Kotecha, Abhay and Zhong, Ellen D.},
+  title   = {{CryoDRGN-ET}: deep reconstructing generative networks for visualizing dynamic biomolecules inside cells},
+  journal = {Nature Methods},
+  volume  = {21},
+  number  = {8},
+  pages   = {1537--1545},
+  year    = {2024},
+  doi     = {10.1038/s41592-024-02340-4}
+}
+
+@article{powell2024tomodrgn,
+  author  = {Powell, Barrett M. and Davis, Joseph H.},
+  title   = {Learning structural heterogeneity from cryo-electron sub-tomograms with {tomoDRGN}},
+  journal = {Nature Methods},
+  volume  = {21},
+  number  = {8},
+  pages   = {1525--1536},
+  year    = {2024},
+  doi     = {10.1038/s41592-024-02210-z}
+}
+
+@article{liu2022isonet,
+  author  = {Liu, Yun-Tao and Zhang, Heng and Wang, Hui and Tao, Chang-Lu and Bi, Guo-Qiang and Zhou, Z. Hong},
+  title   = {Isotropic reconstruction for electron tomography with deep learning},
+  journal = {Nature Communications},
+  volume  = {13},
+  pages   = {6482},
+  year    = {2022},
+  doi     = {10.1038/s41467-022-33957-8}
+}
+
+@article{debarnot2025icetide,
+  author  = {Debarnot, Valentin and Kishore, Vinith and Righetto, Ricardo D. and Dokmani{\'c}, Ivan},
+  title   = {{Ice-Tide}: Implicit cryo-{ET} imaging and deformation estimation},
+  journal = {IEEE Transactions on Computational Imaging},
+  volume  = {11},
+  pages   = {24--35},
+  year    = {2025},
+  doi     = {10.1109/TCI.2024.3519805}
+}
+
+% --- Gaussian, mixture and pseudo-atomic models ----------------------------
+
+@article{marabini1998blobs,
+  author  = {Marabini, Roberto and Herman, Gabor T. and Carazo, Jos{\'e} M.},
+  title   = {{3D} reconstruction in electron microscopy using {ART} with smooth spherically symmetric volume elements (blobs)},
+  journal = {Ultramicroscopy},
+  volume  = {72},
+  number  = {1--2},
+  pages   = {53--65},
+  year    = {1998},
+  doi     = {10.1016/S0304-3991(97)00127-7}
+}
+
+@article{kawabata2008gmm,
+  author  = {Kawabata, Takeshi},
+  title   = {Multiple subunit fitting into a low-resolution density map of a macromolecular complex using a {G}aussian mixture model},
+  journal = {Biophysical Journal},
+  volume  = {95},
+  number  = {10},
+  pages   = {4643--4658},
+  year    = {2008},
+  doi     = {10.1529/biophysj.108.137125}
+}
+
+@article{joubert2015gmm,
+  author  = {Joubert, Paul and Habeck, Michael},
+  title   = {{B}ayesian inference of initial models in cryo-electron microscopy using pseudo-atoms},
+  journal = {Biophysical Journal},
+  volume  = {108},
+  number  = {5},
+  pages   = {1165--1175},
+  year    = {2015},
+  doi     = {10.1016/j.bpj.2014.12.054}
+}
+
+@article{jonic2016pseudoatoms,
+  author  = {Joni{\'c}, Slavica and Sorzano, Carlos Oscar S{\'a}nchez},
+  title   = {Coarse-graining of volumes for modeling of structure and dynamics in electron microscopy: Algorithm to automatically control accuracy of approximation},
+  journal = {IEEE Journal of Selected Topics in Signal Processing},
+  volume  = {10},
+  number  = {1},
+  pages   = {161--173},
+  year    = {2016},
+  doi     = {10.1109/JSTSP.2015.2489186}
+}
+
+@article{chen2021e2gmm,
+  author  = {Chen, Muyuan and Ludtke, Steven J.},
+  title   = {Deep learning-based mixed-dimensional {G}aussian mixture model for characterizing variability in cryo-{EM}},
+  journal = {Nature Methods},
+  volume  = {18},
+  number  = {8},
+  pages   = {930--936},
+  year    = {2021},
+  doi     = {10.1038/s41592-021-01220-5}
+}
+
+@article{chen2023gmm,
+  author  = {Chen, Muyuan and Toader, Bogdan and Lederman, Roy},
+  title   = {Integrating molecular models into {CryoEM} heterogeneity analysis using scalable high-resolution deep {G}aussian mixture models},
+  journal = {Journal of Molecular Biology},
+  volume  = {435},
+  number  = {9},
+  pages   = {168014},
+  year    = {2023},
+  doi     = {10.1016/j.jmb.2023.168014}
+}
+
+@article{chen2024gmmrefine,
+  author  = {Chen, Muyuan and Schmid, Michael F. and Chiu, Wah},
+  title   = {Improving resolution and resolvability of single-particle {cryoEM} structures using {G}aussian mixture models},
+  journal = {Nature Methods},
+  volume  = {21},
+  number  = {1},
+  pages   = {37--40},
+  year    = {2024},
+  doi     = {10.1038/s41592-023-02082-9}
+}
+
+@article{chen2026gmmfocused,
+  author  = {Chen, Muyuan},
+  title   = {{G}aussian mixture model-based focused refinement for enhanced flexible structure determination in {CryoEM} and {CryoET}},
+  journal = {arXiv preprint arXiv:2605.30518},
+  year    = {2026}
+}
+
+@article{kerbl2023gaussian,
+  author  = {Kerbl, Bernhard and Kopanas, Georgios and Leimk{\"u}hler, Thomas and Drettakis, George},
+  title   = {{3D} {G}aussian splatting for real-time radiance field rendering},
+  journal = {ACM Transactions on Graphics},
+  volume  = {42},
+  number  = {4},
+  pages   = {139:1--139:14},
+  year    = {2023},
+  doi     = {10.1145/3592433}
+}
+
+@inproceedings{cai2024xgaussian,
+  author    = {Cai, Yuanhao and Liang, Yixun and Wang, Jiahao and Wang, Angtian and Zhang, Yulun and Yang, Xiaokang and Zhou, Zongwei and Yuille, Alan},
+  title     = {Radiative {G}aussian splatting for efficient {X}-ray novel view synthesis},
+  booktitle = {ECCV},
+  pages     = {283--299},
+  year      = {2024},
+  doi       = {10.1007/978-3-031-73232-4_16}
+}
+
+@inproceedings{zha2024r2gaussian,
+  author    = {Zha, Ruyi and Lin, Tao Jun and Cai, Yuanhao and Cao, Jiwen and Zhang, Yanhao and Li, Hongdong},
+  title     = {{R$^2$-Gaussian}: Rectifying radiative {G}aussian splatting for tomographic reconstruction},
+  booktitle = {NeurIPS},
+  volume    = {37},
+  pages     = {44907--44934},
+  year      = {2024},
+  doi       = {10.52202/079017-1427}
+}
+
+@article{zhang2026cryoetgs,
+  author  = {Zhang, Chi and Yang, Zhidong and Han, Renmin and Zhang, Fa and Feng, Jieqing},
+  title   = {Adaptive {G}aussian representation for differentiable cryo-electron tomography reconstruction},
+  journal = {Journal of Structural Biology},
+  volume  = {218},
+  number  = {1},
+  pages   = {108281},
+  year    = {2026},
+  doi     = {10.1016/j.jsb.2025.108281}
+}
+
+@inproceedings{chen2026cryosplat,
+  author    = {Chen, Suyi and Ling, Haibin},
+  title     = {{CryoSplat}: {G}aussian splatting for cryo-{EM} homogeneous reconstruction},
+  booktitle = {ICLR},
+  year      = {2026},
+  note      = {arXiv:2508.04929}
+}
+
+@article{qu2025gem,
+  author  = {Qu, Huaizhi and Wang, Xiao and Zhang, Gengwei and Peng, Jie and Chen, Tianlong},
+  title   = {{GEM}: {3D} {G}aussian splatting for efficient and accurate cryo-{EM} reconstruction},
+  journal = {arXiv preprint arXiv:2509.25075},
+  year    = {2025}
+}
+
+@article{he2025gaussianem,
+  author  = {He, Bintao and Cheng, Yiran and Li, Hongjia and Gao, Xiang and Gao, Xin and Zhang, Fa and Han, Renmin},
+  title   = {Resolving compositional and conformational heterogeneity in cryo-{EM} with deformable {3D} {G}aussian representations},
+  journal = {arXiv preprint arXiv:2512.21599},
+  year    = {2025}
+}
+
+@inproceedings{shekarforoush2025cryospire,
+  author    = {Shekarforoush, Shayan and Lindell, David B. and Brubaker, Marcus A. and Fleet, David J.},
+  title     = {Reconstructing heterogeneous biomolecules via hierarchical {G}aussian mixtures and part discovery},
+  booktitle = {NeurIPS},
+  volume    = {38},
+  pages     = {84140--84159},
+  year      = {2025},
+  doi       = {10.52202/085713-2538}
+}
+
+% --- Optimization and software ----------------------------------------------
+
+@inproceedings{kingma2015adam,
+  author    = {Kingma, Diederik P. and Ba, Jimmy},
+  title     = {Adam: A method for stochastic optimization},
+  booktitle = {ICLR},
+  year      = {2015},
+  note      = {arXiv:1412.6980}
+}
+
+@inproceedings{paszke2019pytorch,
+  author    = {Paszke, Adam and Gross, Sam and Massa, Francisco and Lerer, Adam and Bradbury, James and Chanan, Gregory and Killeen, Trevor and Lin, Zeming and Gimelshein, Natalia and Antiga, Luca and Desmaison, Alban and K{\"o}pf, Andreas and Yang, Edward and DeVito, Zachary and Raison, Martin and Tejani, Alykhan and Chilamkurthy, Sasank and Steiner, Benoit and Fang, Lu and Bai, Junjie and Chintala, Soumith},
+  title     = {{PyTorch}: An imperative style, high-performance deep learning library},
+  booktitle = {NeurIPS},
+  volume    = {32},
+  year      = {2019},
+  note      = {arXiv:1912.01703}
+}
+
+@inproceedings{tillet2019triton,
+  author    = {Tillet, Philippe and Kung, H. T. and Cox, David},
+  title     = {{Triton}: an intermediate language and compiler for tiled neural network computations},
+  booktitle = {Proceedings of the 3rd ACM SIGPLAN International Workshop on Machine Learning and Programming Languages (MAPL)},
+  pages     = {10--19},
+  year      = {2019},
+  doi       = {10.1145/3315508.3329973}
 }

@@ -1,0 +1,11 @@
+\section{Discussion and Limitations}
+\label{sec:discussion}
+
+STAGS shows that a single Gaussian mixture can drive a complete STA pipeline, from pose search through polishing; on EMPIAR-10164 it matches the half-map FSC crossing of RELION's polished map in a fraction of the logged processing time.
+
+\paragraph{Limitations.}
+STAGS's own half maps stay above FSC~0.143 up to Nyquist, so we report agreement with RELION's half maps rather than gold-standard resolution, and RELION's map still agrees better with the atomic model (FSC~0.5 at 3.86 vs.\ 4.04\,\AA).
+% src: runs/engine/pose_abc_adopt_20261113/blind/scores/cycle4/results.json (gold: no 0.143 crossing); comparison.json (atomic 3.86 / 4.04 A)
+The evaluation is reference-assisted (RELION's particle selection and mask volume), the final pose recipe was adopted after scored proxy runs (\cref{sec:results:ablation}), all real-data results come from one symmetric, lattice-forming benchmark, and the times were not measured on the same hardware.
+% src: engine_rules.json steps.pose_abc_adopt_20261113; runs/engine/inputs/provenance.json
+Next steps are an intrinsic resolution estimate for Gaussian maps, fully independent half-sets and in situ data.

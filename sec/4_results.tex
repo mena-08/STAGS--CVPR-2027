@@ -1,0 +1,95 @@
+\section{Experiments}
+\label{sec:results}
+
+\input{fig/tab_benchmark}
+
+\subsection{Setup}
+\label{sec:results:setup}
+
+\paragraph{Data and baselines.}
+We use EMPIAR-10164, the RELION-5 tomography tutorial~\cite{iudin2023empiar,burt2024relion5}: immature HIV-1 CA-SP1 hexamers~\cite{schur2016hiv} (C6) in five tilt series, 9,038 particles in RELION's half-sets of 4,536 and 4,502.
+% src: runs/engine/pose_abc_adopt_20261113/completion_review.json (recipe_checks: 4536/4502 particles)
+STAGS starts from the initial picks with the pre-refinement tilt alignment and CTF; a file guard verified that it opened no refined RELION file.
+% src: scripts/engine_inputs.py (docstring); runs/engine/pose_abc_adopt_20261113/blind/report.json (guard passed, 0 violations)
+It inherits RELION's final particle selection and half-sets, and one scalar, the volume of RELION's mask (315,397 voxels), shapes its own masks.
+% src: scripts/engine_inputs.py (Select/job077 traced to Extract/job010); blind/launch.json (mask_volume_prior.voxels 315397)
+Baselines are the stored RELION-5 maps after auto-refinement and after five rounds of CTF refinement, Bayesian polishing~\cite{zivanov2019polishing} and refinement (``polished''), at the cumulative times in the project's logs (12.4 and 24.1\,h, other hardware).
+% src: scripts/lean_chain.py (RELION hours 12.43, 24.1); docs/relion5-paper-table4.md
+STAGS runs on $2\times$ RTX PRO 6000 Blackwell, one half-set per GPU.
+% src: CLAUDE.md (KW61627); blind/launch.json (host KW61627)
+
+\paragraph{Metrics.}
+One scorer evaluates every map on RELION's $192^3$, 1.35\,\AA\ grid, inside RELION's mask, with phase-randomization correction~\cite{chen2013highres}.
+% src: runs/engine/pose_abc_adopt_20261113/blind/scores/cycle4/structure/results.json (protocol)
+The \emph{cross-FSC}~\cite{rosenthal2003fsc} compares each STAGS half map with the \emph{opposite} RELION-5 polished half map; we report its 0.143 crossing, its value at 3.5\,\AA\ and its mean over the eight shells from 3.6 to 3.28\,\AA.
+% src: blind/comparison.json (band_definition: native shells 72-79, equal weights)
+RELION's maps are scored the same way, so the polished row is RELION's own half-map FSC.
+Atomic agreement is the FSC~0.5 crossing of the half-map average against the deposited model 5L93~\cite{schur2016hiv}.
+These scores are reference-assisted.
+STAGS's own half-map FSC stays above 0.143 up to Nyquist (0.61 at 3.5\,\AA) and is not used as a resolution estimate.
+% src: blind/scores/cycle4/results.json (table.gold: cross_0143 null, fsc["3.5"] = 0.610)
+
+\subsection{End-to-end benchmark}
+\label{sec:results:benchmark}
+
+\Cref{tab:benchmark} and \cref{fig:teaser} report one fresh run from the picks, which stopped itself after four refinement cycles when the median rotation update fell below its threshold.
+% src: runs/engine/pose_abc_adopt_20261113/completion_review.json (stopping medians 0.379/0.380 deg < 0.401 deg)
+Its cross-FSC crosses 0.143 at 3.269 and 3.251\,\AA, against 3.284\,\AA\ for the polished map and 3.65/3.63\,\AA\ for auto-refinement.
+% src: blind/comparison.json; tab_benchmark_rows.tex (job023 3.646/3.632)
+The polished map remains ahead in the band just above the crossing (mean FSC 0.244 against 0.228/0.226) and in atomic agreement (3.86 against 4.04\,\AA).
+% src: blind/comparison.json (band means; atomic_merged_fsc05_A)
+The crossing margins (0.014/0.033\,\AA) come from a single run and are smaller than the spread of earlier STAGS runs, so we read them as parity.
+% src: completion_review.json (gain_vs_RELION_crossing_A); tab_benchmark_rows.tex (runs C/D/E 3.343-3.414)
+The run took 4.27\,h from the picks to the final map (4.33\,h including extraction and scoring): 89\,min of coarse-to-fine levels, a 19\,min map fit and 35--37\,min per refinement cycle.
+% src: blind/report.json (wall_min 256.23); wall_clock.json (259.49); run_abc.log (ladder 89.2 min; KB fit 19.4 min; cycles 37.1/35.9/35.4/34.6 min)
+This is 18\,\% of RELION's logged 24.1\,h, but not a same-hardware comparison; the RELION-5 paper reports 13\,h before polishing on $2\times$ RTX 4090~\cite{burt2024relion5}.
+% src: 4.33/24.1 = 0.18; docs/relion5-paper-table4.md (13 h 04 min)
+The final recipe includes three pose corrections that were adopted after their predeclared gate had failed (\cref{sec:results:ablation}).
+
+\input{fig/fig_fsc}
+
+\subsection{Side-by-side comparison}
+\label{sec:results:visual}
+
+\Cref{fig:fsc,fig:closeups,fig:locres} compare the two maps under identical processing; the supplement adds rendered views and central sections (\cref{sec:suppl:visual}).
+Both STAGS cross-FSC curves follow RELION's half-map FSC through the crossing (\cref{fig:fsc}a).
+Against the atomic model, STAGS is lower from about 8 to 3.6\,\AA, by up to 0.10 (\cref{fig:fsc}b), and RELION's close-ups show sharper side-chain protrusions (\cref{fig:closeups}).
+% src: docs/paper/fig_abc_fsc.csv (difference -0.099 at 4.05 A; negative 8.1-3.55 A); docs/final-campaign-nov13.md (Visual comparison)
+With one local-resolution estimator for both maps (\cref{fig:locres}), the median is 3.26\,\AA\ for RELION's own halves and 3.20\,\AA\ for the STAGS halves against RELION's; windows coarser than 4\,\AA\ (13\,\% for RELION, 8\,\% for STAGS) lie mostly within 10\,\AA\ of the mask boundary.
+% src: docs/paper/fig_abc_provenance.json (local_resolution.summary: median 3.2589 / 3.2005; fraction_coarser_than_4A 0.133 / 0.075; coarse_within_10A_of_mask_edge 0.72 / 0.79 vs all windows 0.48)
+Because STAGS is scored against RELION's halves, this measures agreement with RELION, not the independent local resolution of the STAGS map.
+
+\input{fig/fig_closeups}
+\input{fig/fig_locres}
+
+\subsection{Fixed-pose particle efficiency}
+\label{sec:results:efficiency}
+
+\input{fig/tab_efficiency}
+
+To isolate the representation, we fix RELION's refined poses, optics and mask and compare Gaussians fitted to the particle images with voxel reconstruction from the same particles (\cref{tab:efficiency}).
+Three predeclared splits each train on 250 half-1 particles from four tomograms and withhold the fifth for image prediction; the voxel baseline is RELION-5's reconstruction.
+% src: runs/native_limited250_20261103/selection.json; docs/stags-limited-particle-study-matrix.md (replications hold out TS03, TS45)
+In every split the Gaussian map agrees better with the half-2 map (mean FSC over 6.5--5.6\,\AA\ +0.061, +0.086, +0.057) and with 5L93.
+% src: docs/results-limited250-three-study-20261103.md; runs/native_limited250_{20261103,R1_20261104,R2_20261104}/native500_score/results.json
+Fitting the same Gaussian initialization and schedule to the 250-particle voxel map instead of the images gives 0.508, the voxel map's level (0.509) rather than 0.570, which attributes the gain to the image-level fit.
+% src: runs/native_limited250_20261103/control_v4_outcome.json; map_only_control_v4/score/results.json
+These results carry qualifications (\cref{sec:suppl:efficiency}).
+The predeclared Gaussian arms, fitted to raw images, failed (0.243 against 0.509); the reported recipe is an earlier one, substituted after that failure and scored under the same frozen gates.
+% src: docs/results-limited250-primary-20261103.md (ray250 0.243, native 0.509); runs/step2_parity_20261103/decision.json
+RELION-5 with 500 particles remains better in every split.
+The map-only control ran once and does not reproduce the voxel map (earlier versions missed the required relative $L_2$ error of 0.10).
+% src: runs/native_limited250_20261103/{map_only_control/decision.json,controls_v2_outcome.json,control_v3_outcome.json}
+Image prediction on the withheld tomogram barely separates the methods (differences below 0.1\,\% of the observed power).
+% src: native500_score/results.json (loss_over_observed_power); docs/results-limited250-primary-20261103.md
+A second study with five disjoint draws points the same way (\cref{tab:efficiency}, ii).
+% src: runs/particle_efficiency_20261102/results.json
+
+\subsection{Ablations}
+\label{sec:results:ablation}
+
+Three pose corrections were tested in matched one-cycle continuations from the final state of an earlier run (\cref{sec:suppl:ablation}): exact Fourier-phase translation scoring, a masked Gaussian search reference, and separate static and shared motion in polishing.
+Each alone gained at most 0.021\,\AA; together they gained 0.082\,\AA\ on half~1 but 0.015\,\AA\ on half~2, failing the predeclared gate of $>0.03$\,\AA\ on each half.
+% src: runs/engine/posefix_20261113/{a,b,c,abc}/result.json; engine_rules.json steps.posefix_20261113
+We adopted the combination after seeing these results, because its band-mean FSC rose on both halves (+0.016/+0.017); the failed gate stands.
+% src: docs/final-campaign-nov13.md (Explicit post-result adoption)

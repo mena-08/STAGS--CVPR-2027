@@ -1,0 +1,203 @@
+\section{Method}
+\label{sec:method}
+
+STAGS represents the structure of each half-set as a C6-symmetric mixture of anisotropic 3D Gaussians, fits it to the particles' 2D tilt-image crops, and estimates poses, per-tilt geometry, optics and motion against the same image model (\cref{fig:teaser}).
+We describe the final run (\cref{sec:results}); constants and solver details are in \cref{sec:suppl:method}.
+% code: runs/engine/runC/run_c.py:main (--recipe E --ladder_stop 5.5 --posefix_abc); src: runs/engine/pose_abc_adopt_20261113/blind/launch.json
+
+\subsection{Data and half-sets}
+\label{sec:method:data}
+
+We use the RELION-5 tutorial data (EMPIAR-10164~\cite{schur2016hiv,iudin2023empiar,burt2024relion5}): five tilt series with RELION's alignment, CTFFIND defocus, scale factors and exposures, and the initial picks, oriented along the surface normal with a random in-plane angle.
+% src: runs/engine/inputs/provenance.json ("tilt_series_contents", "pose_source")
+Particle identities and half-set labels (9,038 particles; 4,536\,/\,4,502) are those of RELION's final selection.
+% src: runs/engine/inputs/provenance.json ("n_selection", "a2.counts"); runs/engine/inputs/halves.json
+RELION's extractor writes per particle a 2D stack of CTF-multiplied (\emph{premultiplied}) tilt-image crops.
+% code: stags/engine.py:extract; stags/relion5_stags.py (transfer T = (c e)^2 for premultiplied stacks)
+The half-sets run as separate processes on separate GPUs with their own images, noise estimates, masks, maps and Gaussians, except as noted in \cref{sec:method:independence}.
+% code: scripts/lean_chain.py:Chain.half_pipeline; runs/engine/night_20261110/night.py:run_pair
+
+\subsection{Gaussian representation}
+\label{sec:method:repr}
+
+The density of half-set $h$ is
+\begin{equation}
+\begin{gathered}
+\rho(\mathbf{x})=\sum_{m=1}^{6}\sum_{k=1}^{K/6} a_k\,\mathcal{N}\!\big(\mathbf{x};\,S_m\bm{\mu}_k,\,S_m\Sigma_kS_m^{\top}\big),\\
+\Sigma_k=Q_k\operatorname{diag}(\mathbf{s}_k^2)Q_k^{\top},
+\end{gathered}
+\label{eq:density}
+\end{equation}
+% code: stags/gaussians.py:GaussianModel.covariance, SymGaussianModel.expanded; stags/relion5_io.py:symmetry_ops("C6")
+where $S_m$ rotates by $60^\circ(m-1)$ about the symmetry axis, $Q_k$ is a unit-quaternion rotation and $a_k>0$ the integrated mass.
+Only the asymmetric unit is parameterized; $K$ counts all copies.
+The Fourier transform is closed-form,
+\begin{equation}
+F(\mathbf{q})=\sum_{k} a_k \exp\!\big(-2\pi^2\,\mathbf{q}^{\top}\Sigma_k\mathbf{q}\big)\exp\!\big(-2\pi i\,\mathbf{q}\cdot\bm{\mu}_k\big),
+\label{eq:ft}
+\end{equation}
+% code: stags/gaussians.py:fourier_volume, fourier_project; stags/fourier_triton.py (forward kernel); stags/fourier_volume_triton.py:fourier_volume_at
+summed over all copies.
+Fused Triton~\cite{tillet2019triton} kernels in PyTorch~\cite{paszke2019pytorch} evaluate \cref{eq:ft} at tilt-image frequencies, with analytic gradients, and on 3D grids.
+% code: stags/fourier_triton.py:fourier_project_fused; stags/slice_render.py:FourierVolume; stags/fourier_volume_triton.py:fourier_volume_at
+
+The seed model is sampled from the half's own back-projection of 250 particles at their pick poses (40\,\AA); no external reference is used.
+% code: stags_engine.py:main (backproject; lowpass 40); stags/engine.py:initial_model
+During the resolution ladder (\cref{sec:method:pose}), the model is densified at every level change: light Gaussians and those outside a 250\,\AA\ sphere are pruned, and the widest are split along their long axis until $K$ reaches a budget $\propto d^{-3}$, from 1,056 at 16\,\AA\ to about 26,000 at 5.5\,\AA.
+% code: stags/engine.py:densify, k_target_total; src: runs/engine/pose_abc_adopt_20261113/blind/lean/ladder/h{1,2}/summary.json (K_total 1056; 25998 / 26046)
+Later fits use $K=48{,}000$ without densification, re-seeded likewise at the 5.5\,\AA\ poses.
+% code: runs/engine/night_20261110/night.py:fit_cmd (--K 48000 --init voxel); stags/relion5_stags.py (init == "voxel")
+
+\subsection{Image formation and likelihood}
+\label{sec:method:forward}
+
+Particle $i$ has orientation $R_i$ and 3D offset $\mathbf{t}_i$ in the frame of its first tilt image; for tilt image $j$, $A_{ij}=\Gamma_{ij}R_i$, where $\Gamma_{ij}$ is the relative tilt rotation from the tilt-series alignment.
+% code: stags/relion5_io.py (A = Rt[f] M); stags/relion5_stags.py:relion_pose_decomposition
+By the Fourier slice theorem, the predicted transform at 2D frequency $\bm{\kappa}$ is
+\begin{equation}
+\begin{aligned}
+P_{ij}(\bm{\kappa})&=F\!\big(A_{ij}^{\top}[\bm{\kappa};0]\big)\,e^{-2\pi i\,\bm{\kappa}\cdot\mathbf{u}_{ij}},\\
+\mathbf{u}_{ij}&=\Pi\,\Gamma_{ij}\mathbf{t}_i+\bm{\delta}_{ij},
+\end{aligned}
+\label{eq:slice}
+\end{equation}
+% code: stags/gaussians.py:project_params, fourier_project; stags/engine.py:HalfData.row_geometry; stags/train.py:PoseRefiner.apply
+where $\Pi=[I_2\;\mathbf{0}]$ and $\bm{\delta}_{ij}$ are per-image shifts from polishing (\cref{sec:method:polish}).
+Each Gaussian thus projects analytically to a 2D Gaussian with covariance $\Pi A\Sigma_kA^{\top}\Pi^{\top}$ and center $\Pi A\bm{\mu}_k$.
+The CTF is
+\begin{equation}
+\begin{aligned}
+c_{ij}(\bm{\kappa})&=-\beta_j\big[\sqrt{1-w^2}\sin\chi_{ij}+w\cos\chi_{ij}\big],\\
+\chi_{ij}&=\pi\lambda\,\Delta f_{ij}(\varphi)|\bm{\kappa}|^2-\tfrac{\pi}{2}C_s\lambda^3|\bm{\kappa}|^4,
+\end{aligned}
+\label{eq:ctf}
+\end{equation}
+% code: stags/relion5_io.py:_ctf_parts, wavelength
+with per-tilt scale $\beta_j$, amplitude contrast $w$, and defocus $\Delta f_{ij}$ combining mean defocus, astigmatism and particle depth; the exposure filter $d_j(\bm{\kappa})$ follows~\cite{grant2015dose}.
+% code: stags/relion5_io.py (depth offset); stags/optics.py
+
+We model $\hat{y}_{ij}=c_{ij}d_jP_{ij}+n_{ij}$ with circular Gaussian noise of power $\sigma^2(|\bm{\kappa}|)$.
+The stored crops are premultiplied, $\tilde{y}_{ij}=c_{ij}d_j\hat{y}_{ij}$, so with $T_{ij}=(c_{ij}d_j)^2$ the negative log-likelihood is, up to a constant, $\tfrac12\mathcal{L}$ with
+\begin{equation}
+\mathcal{L}=\sum_{i,j,\bm{\kappa}\neq0}\eta\,w\Big[T_{ij}|P_{ij}|^2-2\operatorname{Re}\big(\overline{P_{ij}}\,\tilde{y}_{ij}\big)\Big],
+\label{eq:like}
+\end{equation}
+% code: stags/likelihood.py:image_objective (premultiplied: T|P|^2 - 2 Re(conj(P) D)), shell_noise_inverse
+which needs no division by the CTF; $\eta(\bm{\kappa})$ is the Hermitian multiplicity, and the whitening weight is $w(|\bm{\kappa}|)=1/\sigma^2$, with $\sigma^2$ estimated per shell as $\sum|\tilde{y}|^2/\sum T$ over the half's images (signal included).
+Since $c_{ij}$ and $d_j$ are real, $\mathcal{L}=\sum\eta\,w\,|\hat{y}_{ij}-c_{ij}d_jP_{ij}|^2$ up to a term that does not depend on the model, so fitting the premultiplied crops is fitting the unfiltered tilt-image crops.
+Each stage restricts \cref{eq:like} to $|\bm{\kappa}|\le k_{\mathrm{cut}}$.
+% code: stags/likelihood.py:shell_noise_inverse; stags/engine_search.py:noise_weights
+To account for the neighboring lattice in the crops, each half derives after the ladder a soft cylindrical mask $M$ from its own back-projection and models the outside density as $V_{\mathrm{out}}=V_A(1-M)$, with $V_A$ its Wiener back-projection at the current poses; map fits and P2 subtract $T_{ij}$ times the projection of $V_{\mathrm{out}}$ from $\tilde{y}_{ij}$, whereas P1 adds that projection to the prediction.
+% code: runs/engine/night_20261110/night.py:cylinder_mask_from_volume; stags/relion5_stags.py (outside_volume = VA * (1 - mask)); stags/engine.py:HalfData.subtract_outside; runs/engine/v6/cycles/p1_polish.py (background_spectrum)
+
+\subsection{Map fitting}
+\label{sec:method:fit}
+
+In the ladder, Adam~\cite{kingma2015adam} fits the Gaussians to \cref{eq:like} with $k_{\mathrm{cut}}=1/d$, weighting each particle's top candidate poses by their posterior, through the 2D projector.
+% code: stags/engine.py:fit_soft
+With poses and corrections fixed, the data term is accumulated once into sufficient statistics on a twofold-oversampled 3D Fourier grid: each sample at $\mathbf{q}=A_{ij}^{\top}[\bm{\kappa};0]$ is spread onto the nodes $\mathbf{q}_n$ with normalized Kaiser--Bessel weights $b_n(\mathbf{q})$ and mirrored to $-\mathbf{q}$ with half weight,
+\begin{equation}
+\begin{aligned}
+B_n&=\textstyle\sum\tfrac12\eta w\,b_n(\mathbf{q})\,\tilde{y}_{ij}\,e^{2\pi i\bm{\kappa}\cdot\mathbf{u}_{ij}},\\
+W_n&=\textstyle\sum\tfrac12\eta w\,b_n(\mathbf{q})\,T_{ij},\\
+\mathcal{L}_{\mathrm{KB}}&=\textstyle\sum_n W_n|F(\mathbf{q}_n)|^2-2\operatorname{Re}\big(\overline{F(\mathbf{q}_n)}B_n\big).
+\end{aligned}
+\label{eq:kb}
+\end{equation}
+% code: stags/normal_kb.py:build_kb_statistics, KBStatistics.objective, KBGrid.stencil
+$\mathcal{L}_{\mathrm{KB}}$ is an approximation: lumping the normal operator onto its diagonal adds the nonnegative term $\sum wT\big[\sum_n b_n|F(\mathbf{q}_n)|^2-|\sum_n b_nF(\mathbf{q}_n)|^2\big]$ to the interpolated image objective.
+% code: stags/normal_kb.py (module docstring: row-sum lumped normal operator)
+$F$ is evaluated analytically at a random subset of nodes per Adam step, and outside density enters as $B_n\leftarrow B_n-W_nF_{\mathrm{out}}(\mathbf{q}_n)$.
+The band $k_{\mathrm{cut}}$ marches linearly from $1/20$\,\AA$^{-1}$ (cold fit) or $1/6$\,\AA$^{-1}$ (warm fits) to Nyquist ($1/2.7$\,\AA$^{-1}$) over 60\% of the steps.
+The half map is the inverse FFT of \cref{eq:ft} on the voxel grid.
+% code: stags/train.py:fit_half (grid_stats.objective, sample_size; kcut march_frac 0.6); runs/engine/runC/run_c.py (band_start 6.0 in P3); stags/gaussians.py:voxelize
+
+\subsection{Pose estimation}
+\label{sec:method:pose}
+
+For candidate poses of particle $i$, STAGS evaluates
+\begin{equation}
+\begin{aligned}
+E_i(R,\mathbf{t})&=\tfrac12\mathcal{L}_i(R,\mathbf{t})+\tfrac12\Big(\frac{\theta(R)-90^\circ}{\sigma_\theta}\Big)^2,\\
+\pi_i(R,\mathbf{t})&\propto e^{-E_i(R,\mathbf{t})},
+\end{aligned}
+\label{eq:posterior}
+\end{equation}
+% code: stags/engine_search.py:score, posterior_cached, posterior_sliced (w = exp(-NLL - logsumexp), tilt prior)
+where $\mathcal{L}_i$ is the particle's term of \cref{eq:like} and $\theta(R)$ the angle between the candidate symmetry axis and the pick normal ($\sigma_\theta=10^\circ$, candidates beyond $3\sigma_\theta$ excluded).
+Translations (3D offsets on a lattice) are scored through bilinearly interpolated cross-correlation maps.
+% code: stags/engine_search.py:sphere_grid, shift_nll; scripts/lean_chain.py:ladder_config (sigma_tilt 10)
+
+\paragraph{Resolution ladder.}
+After a seed stage on 250 particles, each half runs levels at 16, 12, 10, 8, 6.5 and 5.5\,\AA\ with $k_{\mathrm{cut}}=1/d$.
+At 16\,\AA\ the search is global over SO(3)/C6 within the tilt prior (a $10^\circ$ grid refined at $\pm5^\circ$), with projections rendered exactly by the 2D projector.
+Finer levels search locally around the previous best candidates, down to a $3^\circ$ ball on a $0.5^\circ$ lattice at 5.5\,\AA, using trilinear central slices of a fourfold-padded table of \cref{eq:ft}.
+Each level alternates E-steps, which set the pose to the most probable candidate, with map fits (\cref{tab:suppl:ladder}).
+% code: scripts/lean_chain.py:LADDER, seed_config; stags/engine_search.py:posterior_cached, posterior_sliced; stags/slice_render.py:FourierVolume; stags_engine.py:main
+
+\paragraph{Local refinement (P2).}
+Each polishing cycle starts with a local search ($3^\circ$, shifts within 5\,\AA, $k_{\mathrm{cut}}=1/3.5$\,\AA$^{-1}$), after which the pose moves to the posterior mean of the top 8 candidates,
+\begin{equation}
+\begin{aligned}
+\bar{R}&=R_{(1)}\exp\!\Big(\textstyle\sum_{m\le8}\tilde{\pi}_m\log\big(R_{(1)}^{\top}R_{(m)}\big)\Big),\\
+\bar{\mathbf{t}}&=\textstyle\sum_{m\le8}\tilde{\pi}_m\mathbf{t}_{(m)},
+\end{aligned}
+\label{eq:postmean}
+\end{equation}
+% code: runs/engine/lean_20261110c/kb/p2_search.py (update "top8": R_mean, t_mean; cap_rad; t cap a.d)
+with renormalized weights $\tilde{\pi}$, capped at $0.80^\circ$ and 3.5\,\AA.
+% src: runs/engine/pose_abc_adopt_20261113/blind/launch.json (cap_deg 0.8021)
+Two components of the final recipe act here:
+(a)~\emph{Exact translation}: $\mathbf{t}_i$ is then refined by Gauss--Newton on $\mathcal{L}_i$ with the exact phase $e^{-2\pi i\bm{\kappa}\cdot\Pi\Gamma_{ij}\mathbf{t}}$ instead of interpolated cross-correlations.
+% code: stags/translation_refine.py:refine_translations; runs/engine/lean_20261110c/kb/p2_search.py:refine_final_translation
+(b)~\emph{Masked reference}: the reference is the voxelized mixture times $M$, matching the $V_{\mathrm{out}}$-subtracted data.
+% code: runs/engine/lean_20261110c/kb/p2_search.py (--mask_reference; subtract_outside(V_own))
+
+\subsection{Polishing cycles}
+\label{sec:method:polish}
+
+Each cycle runs P2, an optics scan with re-extraction, P1 and a warm map fit (P3), until the median P2 rotation change is below $0.40^\circ$ on both halves, or for at most five cycles; the final run stopped after cycle 4.
+% code: runs/engine/runC/run_c.py:cycle_E, main (STOP_DEG = CAP_DEG/2, MAX_CYCLES = 5); src: runs/engine/pose_abc_adopt_20261113/blind/run_abc.log (cycle 4: 0.38 / 0.38 deg -> converged)
+
+\paragraph{Optics scan.}
+A grid search fits a defocus change, an astigmatism change and a scale per tilt image to crops without CTF multiplication, minimizing the whitened residual of the unmasked Gaussian prediction, with priors coupling consecutive exposures and pulling toward per-tomogram values; the stacks are then re-extracted (\cref{sec:suppl:method:optics}).
+% code: runs/engine/night_20261110/swap/tilt_optics_scan.py; runs/engine/runC/run_c.py:SCAN_FLAGS_E, cycle_E
+
+\paragraph{Geometry and motion (P1).}
+With poses fixed, P1 minimizes \cref{eq:like} over a rotation and a 2D shift per tilt image (Adam) and over particle motion.
+% code: stags/relion5_stags.py:tilt_geometry_tensors; runs/engine/v6/cycles/p1_polish.py
+(c)~\emph{Separated motion}: each particle has a static 3D offset $\mathbf{u}_i$ and a trajectory in exposure order, $\mathbf{m}_{ij}=\sum_{j'\le j}\mathbf{v}_{ij'}$, zero at the first exposure.
+The offset moves only the Gaussians inside $M$, whereas the trajectory also moves the neighboring Gaussians and the projected $V_{\mathrm{out}}$, so the particle and its surroundings need not share a translation.
+% code: stags/motion.py:MotionState, separated_shift_grad_hess; runs/engine/v6/cycles/p1_polish.py:render (--separate_particle_translation)
+The motion prior (in units of twice the negative log-probability) is
+\begin{equation}
+\begin{aligned}
+\Omega={}&\sum_{i,j}\frac{|\mathbf{v}_{ij}|^2}{(\sigma_v\,\Delta N_{ij})^2}+\sum_i\frac{|\mathbf{u}_i|^2}{\sigma_u^2}\\
+&+\sum_{(i,i')\in\mathcal{N}}\sum_{j}\frac{|\mathbf{v}_{ij}-\mathbf{v}_{i'j}|^2}{\sigma_{\mathrm{nb}}^2},
+\end{aligned}
+\label{eq:motion}
+\end{equation}
+% code: stags/motion.py:MotionState (w_vel, w_nb, w_u); runs/engine/v6/cycles/p1_polish.py (sigma_vel 0.2, sigma_nb 0.5, sigma_u 10); stags/relion5_stags.py:tilt_prior_tensors (radius 200 A)
+with exposure increments $\Delta N_{ij}$, $\sigma_v=0.2$\,\AA\ per e/\AA$^2$ as in RELION's polishing~\cite{zivanov2019polishing}, $\sigma_{\mathrm{nb}}=0.5$\,\AA, $\sigma_u=10$\,\AA, and $\mathcal{N}$ the pairs of neighboring particles within 200\,\AA.
+Motion is updated by damped Gauss--Newton steps with conjugate gradients; offsets are folded into $\mathbf{t}_i$ for the next P2, and trajectories into the fixed shifts $\bm{\delta}_{ij}$.
+% code: stags/motion.py; runs/engine/v6/cycles/p1_polish.py (exports poses.pt t = t + u, shifts.npz trajectory); runs/engine/runC/run_c.py:cycle_E (POSEFIX_ABC branch)
+
+\subsection{Half-set independence and reference-assisted elements}
+\label{sec:method:independence}
+
+The halves exchange information at two points.
+During the seed and the 16 and 12\,\AA\ levels, the pose-scoring reference averages both halves' transforms below 40\,\AA; the map fits never see the other half.
+% code: stags/engine.py:join_partner; stags/engine_search.py (F[|k|<=1/40] = 0.5 (own + other)); stags/slice_render.py:blend_low
+The cycle stop rule and the continuation of the optics scan are decided on both halves jointly.
+% code: runs/engine/runC/run_c.py:cycle_E (converged = all halves; scan_still_on = max over halves)
+Each cycle records cross-half correlations of the P1 per-tilt shifts and rotations, per-tilt mean particle shifts and scanned defocus changes (final run: shifts $r\ge0.99$, rotations 0.85--0.93, defocus 0.91 falling to 0.53).
+These correlations are reported, not used to accept or reject individual updates; the restriction to reproducible corrections is by design.
+During development, a polishing group was admitted only if its estimates from the two halves correlated at $r>0.8$, and in the final run every group of tilt-geometry and particle-motion corrections reproduces at $r\ge0.85$.
+% code: runs/engine/night_20261110/night.py:reproducibility; runs/engine/runC/run_c.py:cycle_E (logged only); src: runs/engine/pose_abc_adopt_20261113/blind/run_abc.log (cycles 1-4: shifts 1.00/1.00/1.00/0.99, rotations 0.93/0.88/0.86/0.85, particle shifts 0.99); engine_rules.json (full_chain_nov08.stage5.decision, lean_chain_nov10.fast_cycles.group_admission, lean_chain_nov10.kb_chain_nov10.step3_cycles.admission, night_20261110.items.item3_cycles.rule: groups kept only if r > 0.8 between halves; stage 3 override r = 0.985 / 0.987)
+
+The run is reference-assisted: the particle set and half-set labels come from RELION's final selection, the tilt-series alignment and initial optics from RELION's preprocessing, and the crops from RELION's extractor.
+% src: runs/engine/inputs/provenance.json
+One scalar from RELION's FSC mask, its volume of 315,397 voxels, sets the $K$ budget and the radius of STAGS's own masks.
+% code: runs/engine/runC/run_c.py:MASK_FSC_VOXELS; scripts/lean_chain.py:MASK_VOLUME_A3; src: runs/engine/pose_abc_adopt_20261113/blind/launch.json (mask_volume_prior)
+Components (a)--(c) were adopted after inspecting reference-scored proxy runs, although their predeclared gate had failed; the final run then ran once, fresh from the picks, under a guard that refuses to open RELION's refined files, with RELION-referenced scores computed separately for reporting only.
+% src: runs/engine/pose_abc_adopt_20261113/run.py (LIMITATION); runs/engine/pose_abc_adopt_20261113/blind/launch.json (guard_probe refused); runs/engine/runC/run_c.py:score_bg

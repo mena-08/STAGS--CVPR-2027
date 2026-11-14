@@ -1,0 +1,56 @@
+\section{Related Work}
+\label{sec:related}
+
+\paragraph{Subtomogram averaging.}
+Classic STA aligns and averages 3D subtomograms with missing-wedge compensation~\cite{forster2005av3,nicastro2006peet,castanodiez2012dynamo,hrabe2012pytom,wan2024stopgap}; RELION brought regularized-likelihood expectation-maximization over poses~\cite{scheres2012relion} to subtomograms~\cite{bharat2016relion}.
+Later tools refine against the 2D tilt images.
+EMAN2 corrects the CTF and refines the alignment of each particle in each tilt~\cite{chen2019eman2}; emClarity refines the tilt-series alignment with particles as fiducials (tomoCPR) and estimates per-tilt defocus~\cite{himes2018emclarity}; M~\cite{tegunov2021m} fits per-particle trajectories, tilt geometry and defocus to the tilt images; RELION-4/5~\cite{zivanov2022relion4,burt2024relion5} evaluates pseudo-subtomograms of CTF-premultiplied tilt images and adds CTF refinement and Bayesian polishing~\cite{zivanov2019polishing}; nextPYP~\cite{liu2023nextpyp} refines constrained 2D particle projections.
+NovaCTF~\cite{turonova2017novactf} corrects the defocus gradient through the sample depth, and gradient descent has recently been used to refine tilt-series alignment~\cite{chen2026tiltrefine}.
+In all of these the map is a voxel grid rebuilt by back-projection, and global pose search is a step separate from geometry and motion refinement (\cref{tab:related}).
+
+\begin{table}[t]
+  \centering
+  \small
+  \setlength{\tabcolsep}{3.2pt}
+  % src: cells from the cited papers: himes2018emclarity (GPU-accelerated; tomoCPR; per-tilt defocus);
+  % chen2019eman2 (subtilt refinement: per-particle per-tilt alignment and CTF);
+  % tegunov2021m (refinement on tilt images; per-particle trajectories; tilt angles/offsets; GPUs; initial alignment in RELION on Warp subtomograms);
+  % zivanov2022relion4 (pseudo-subtomograms; tilt-series alignment, beam-induced motion; Refine3D on GPU nodes, CTF refinement/frame alignment on CPU nodes);
+  % burt2024relion5 (Bayesian polishing: tilt-series realignment and per-particle motion);
+  % liu2023nextpyp (2D projections; region-based tilt-geometry refinement; video-frame particle tracking; GPU only for picking).
+  % src (STAGS row): sec/0_abstract.tex; docs/final-campaign-nov13.md; runs/engine/pose_abc_adopt_20261113/blind/report.json
+  \resizebox{\columnwidth}{!}{%
+  \begin{tabular}{@{}lccccc@{}}
+    \toprule
+    Method & Map & Data & Tilt geom. & Ptcl.\ motion & GPU \\
+    \midrule
+    emClarity~\cite{himes2018emclarity} & voxel & 3D & \checkmark & -- & \checkmark \\
+    EMAN2~\cite{chen2019eman2} & voxel & 3D+2D & -- & \checkmark & -- \\
+    Warp/M~\cite{tegunov2019warp,tegunov2021m} & voxel & 3D+2D & \checkmark & \checkmark & \checkmark \\
+    RELION-4/5~\cite{zivanov2022relion4,burt2024relion5} & voxel & P3D & \checkmark & \checkmark & part \\
+    nextPYP~\cite{liu2023nextpyp} & voxel & 2D & \checkmark & \checkmark & picking \\
+    \midrule
+    STAGS & Gaussians & 2D & \checkmark & \checkmark & \checkmark \\
+    \bottomrule
+  \end{tabular}}
+  \caption{STA methods as described in their papers (--: not described).
+  Data that poses are refined against: 3D subtomograms, 2D tilt images, or P3D pseudo-subtomograms of CTF-premultiplied tilt images.
+  Tilt geom./Ptcl.\ motion: tilt-series alignment and per-particle motion refined against the average.
+  GPU: refinement on GPU (RELION: CTF refinement and polishing on CPU; nextPYP: GPU only for picking).}
+  \label{tab:related}
+\end{table}
+
+\paragraph{Learned representations.}
+CryoDRGN~\cite{zhong2021cryodrgn} and its cryo-ET versions~\cite{rangan2024cryodrgnet,powell2024tomodrgn} learn structural heterogeneity from particle images, with poses from upstream refinement; ICE-TIDE~\cite{debarnot2025icetide} and IsoNet~\cite{liu2022isonet} reconstruct or restore single tomograms without averaging.
+
+\paragraph{Gaussian models.}
+Gaussian blobs and mixtures have long represented EM densities~\cite{marabini1998blobs,kawabata2008gmm}.
+Joubert and Habeck~\cite{joubert2015gmm} infer a low-resolution initial model of Gaussian pseudo-atoms jointly with image orientations.
+e2gmm~\cite{chen2021e2gmm,chen2023gmm} maps a mixture onto particle images in known orientations to model heterogeneity; GMM-based refinement improves orientations of flexible regions~\cite{chen2024gmmrefine} and now performs focused refinement on 2D sub-tilt series in cryo-ET~\cite{chen2026gmmfocused}, with the mixture as alignment reference and the map still reconstructed from the particles.
+3D Gaussian splatting~\cite{kerbl2023gaussian} has been adapted to tomography~\cite{zha2024r2gaussian} and to cryo-ET tomograms~\cite{zhang2026cryoetgs}.
+CryoSplat~\cite{chen2026cryosplat} and GEM~\cite{qu2025gem} reconstruct homogeneous single-particle maps with Gaussians from known poses, and GaussianEM~\cite{he2025gaussianem} and CryoSPIRE~\cite{shekarforoush2025cryospire} model heterogeneity with deformable or hierarchical Gaussians.
+
+\paragraph{Positioning.}
+Each of these Gaussian methods addresses one task.
+STAGS fits a Gaussian mixture (one per half-set) directly to the 2D tilt-image particle stacks and uses it in every STA stage from the initial picks: global and local pose search, map fitting, tilt-geometry refinement and per-particle motion polishing.
+To our knowledge, no prior STA pipeline uses a Gaussian mixture as the map in all of these stages.
