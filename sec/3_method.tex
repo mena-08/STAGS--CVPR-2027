@@ -9,7 +9,7 @@ STAGS represents the structure as a mixture of 3D Gaussians whose projections ar
 It first searches poses and fits the map from coarse to fine resolution (\cref{sec:method:pose}), then refines poses, optics, geometry and motion against the same model (\cref{sec:method:polish}).
 \Cref{fig:teaser} illustrates these steps on EMPIAR-10164.
 STAGS processes the two half-sets independently, and the Fourier shell correlation (FSC) between their maps measures resolution (\cref{sec:method:independence}).
-Settings specific to a dataset are listed in \cref{tab:suppl:datasets}.
+Settings specific to a dataset are listed in \suppref{tab:suppl:datasets}.
 
 \subsection{Gaussian map}
 \label{sec:method:repr}
@@ -36,7 +36,7 @@ A voxel map knows its transform only at grid nodes, so every image it predicts i
 \Cref{eq:ft} instead gives $F$ exactly at any frequency, with analytic gradients for all parameters, so STAGS predicts images without interpolation, except where speed requires it (\cref{sec:method:pose}).
 The model starts from a low-resolution back-projection of the half's own particles at their picked poses, with no external reference.
 STAGS fits from coarse to fine target resolution $d$, the finest detail fitted at a stage (\cref{sec:method:pose}).
-A volume $V$ holds about $V/(d/2)^3$ independent elements at resolution $d$, so the number of Gaussians grows as $d^{-3}$, up to a cap, by splitting the widest Gaussians and pruning light ones (\cref{sec:suppl:method:init}).
+A volume $V$ holds about $V/(d/2)^3$ independent elements at resolution $d$, so the number of Gaussians grows as $d^{-3}$, up to a cap, by splitting the widest Gaussians and pruning light ones (\suppref{sec:suppl:method:init}).
 
 \subsection{Image formation and likelihood}
 \label{sec:method:forward}
@@ -55,9 +55,11 @@ where $[\bm{\kappa};0]$ is the image frequency written as a 3D vector in the pla
 Its component along the beam is zero because a projection sums the density along each ray, so the image holds no information about how the density varies in that direction.
 Formally, with the beam along $z$, the projection $\int\rho\,dz$ has the 2D Fourier transform $F(\kappa_x,\kappa_y,0)$.
 The phase ramp shifts the projection by $\mathbf{u}_{ij}$, the particle's 3D offset projected into image $j$ plus any per-image shift.
-The microscope's optics multiply this projection by the contrast transfer function (CTF) $c_{ij}$, which depends on the defocus at the particle's depth~\cite{burt2024relion5}, and radiation damage suppresses it by the exposure filter $e_j$~\cite{grant2015dose} (\cref{eq:ctf}).
+The microscope's optics multiply this projection by the contrast transfer function (CTF) $c_{ij}$, which depends on the defocus at the particle's depth~\cite{burt2024relion5}, and radiation damage suppresses it by the exposure filter $e_j$~\cite{grant2015dose} (\suppref{eq:ctf}).
 The predicted crop is thus $c_{ij}e_jP_{ij}$.
-We model the noise in the observed crop $y_{ij}$ as normally distributed and independent at each frequency, with a variance $\sigma^2(|\bm{\kappa}|)$ that depends only on how fine the frequency is.
+%We model the noise in the observed crop $y_{ij}$ as normally distributed and independent at each frequency, with a variance $\sigma^2(|\bm{\kappa}|)$ that depends only on how fine the frequency is.
+Following the standard cryo-EM noise formulation~\cite{scheres2012relion}, we model the additive noise in each observed crop $y_{ij}$ as stationary and Gaussian, which renders Fourier coefficients independent across spatial frequencies with a radially symmetric spectral variance $\sigma^2(|\bm{\kappa}|)$.
+
 The negative log-likelihood is then, up to a constant that does not depend on the estimates, $\tfrac12\mathcal{L}$ with
 \begin{equation}
 \mathcal{L}=\sum_{i,j,\bm{\kappa}}w(|\bm{\kappa}|)\,\big|y_{ij}-c_{ij}e_jP_{ij}\big|^2,\quad w=1/\sigma^2.
@@ -66,7 +68,7 @@ The negative log-likelihood is then, up to a constant that does not depend on th
 % code: stags/likelihood.py:image_objective, shell_noise_inverse
 Each frequency thus counts by how reliable it is, so the many noise-dominated high frequencies do not swamp the strong low-frequency signal.
 The variance $\sigma^2$ is estimated per frequency shell from the half's own crops.
-STAGS evaluates \cref{eq:like} directly on the CTF-premultiplied crops written by standard extractors, without dividing by the CTF (\cref{sec:suppl:method:data}).
+STAGS evaluates \cref{eq:like} directly on the CTF-premultiplied crops written by standard extractors, without dividing by the CTF (\suppref{sec:suppl:method:data}).
 Because crops also contain neighboring density (lattice neighbors, crowded cytoplasm), each half builds a soft mask $M$ around its particle after the first pass, back-projects its images into a voxel map, and subtracts the projection of that map outside $M$ from the data, so that only the particle is fitted.
 % code: stags/relion5_stags.py (outside_volume = VA * (1 - mask)); stags/engine.py:HalfData.subtract_outside
 
@@ -97,8 +99,7 @@ With such noisy data a particle's best pose is often uncertain, so each particle
 A particle torn between two poses thus contributes both at half weight instead of committing to a possibly wrong one.
 The next search starts from each particle's best candidate.
 
-After the ladder, the poses are fixed for map fits over all frequencies, starting from a new, larger model seeded at these poses.
-The image data are then summed once onto a 3D Fourier grid where $F$ is evaluated exactly (\cref{sec:suppl:method:fit}), so each optimizer step costs the same regardless of the number of particles.
+After the ladder, poses are fixed and a new, larger model is fitted across all frequencies. Evaluating every particle crop at each gradient step would scale poorly with dataset size. Instead, because the poses and image corrections are now fixed, we accumulate all 2D image observations once onto a 3D Fourier grid of sufficient statistics (\suppref{sec:suppl:method:fit}). Each Adam step then evaluates the exact closed-form Gaussian transform $F$ on random mini-batches of occupied grid nodes, making the optimization cost per step independent of the number of particles.
 
 \subsection{Refinement of poses, optics, geometry and motion}
 \label{sec:method:polish}
@@ -111,13 +112,13 @@ A refinement cycle has four steps.
 \begin{enumerate}[label=(\roman*),nosep,leftmargin=*]
 \item \emph{Local pose refinement} searches a few degrees around each pose, with translations scored exactly rather than interpolated and the map restricted to the particle mask $M$.
 \item \emph{Optics (CTF) refinement} re-estimates the CTF of each tilt image, namely its defocus, astigmatism and scale.
-\item \emph{Geometry and motion refinement} fits a small rotation and shift per tilt image and, per particle, a static offset and a trajectory over the exposures, which a prior as in Bayesian polishing~\cite{zivanov2019polishing} keeps smooth and alike between neighbors because one particle's data determine its motion only weakly.
+\item \emph{Geometry and motion refinement} estimates a rigid rotation and shift per tilt image alongside a static 3D offset and per-exposure trajectory for each particle. Because single-particle crops have low SNR per tilt, we regularize the trajectories with a spatiotemporal prior following Bayesian polishing~\cite{zivanov2019polishing}, enforcing smooth motion across exposures and spatial coherence among neighboring particles.
 \item The \emph{map} is refitted, starting from the current map.
 \end{enumerate}
 To keep one noisy cycle from moving poses far, the pose change per cycle is capped at $d/D$ radians, for resolution $d$ and particle diameter $D$.
 This is the usual angular step at resolution $d$, which moves the particle's rim by about $d/2$.
 Cycles stop once the median pose change falls below half this cap on both halves.
-Details are in \cref{sec:suppl:method:p2,sec:suppl:method:optics,sec:suppl:method:p1}.
+Details are in \suppref{sec:suppl:method:p2,sec:suppl:method:optics,sec:suppl:method:p1}.
 
 \subsection{Half-set independence}
 \label{sec:method:independence}

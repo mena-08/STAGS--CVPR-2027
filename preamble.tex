@@ -27,6 +27,12 @@
 \usepackage{currfile} %< for \currfilebase macro
 
 %%
+%% References across the paper/supplement boundary: the printed text says where the target is
+%%
+\newcommand{\suppref}[1]{supplementary~\cref{#1}}
+\newcommand{\mainref}[1]{\cref{#1} of the main paper}
+
+%%
 %% caption and (global) spacing overrides
 %%
 \usepackage{caption} %< for "\captionof" commands (teaser)

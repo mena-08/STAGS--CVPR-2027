@@ -1,0 +1,8 @@
+\section{Conclusion}
+\label{sec:conclusion}
+
+We presented STAGS, a subtomogram-averaging pipeline that represents the map as a mixture of 3D Gaussians and fits it to tilt-image data from pose search through refinement. On EMPIAR-10164, its half maps reach cross-FSC 0.143 crossings of 3.27 and 3.25\,\AA\ against RELION-5's opposite half maps, close to the 3.28\,\AA\ crossing between RELION's own half maps. The recorded STAGS run took 4.3\,h, compared with 24.1\,h in RELION's project logs; the runs used different hardware and processing scopes. RELION's map retains better agreement with the atomic model and more side-chain detail.
+
+In fixed-pose comparisons with 250 particles, Gaussian maps fitted to tilt images achieve higher agreement with the RELION reference than voxel maps reconstructed from the same particles in all three tested subsets. Controls support image-level fitting as a source of this gain. These results demonstrate an improvement at low resolution and small particle counts; its value at higher resolution remains to be established.
+
+STAGS's own half-map FSC remains above 0.143 through Nyquist, so it does not provide a usable gold-standard resolution estimate in this benchmark. We therefore report cross-FSC agreement with RELION as a reference-assisted comparison. Because both STAGS half-maps use smooth Gaussian mixtures and the same densification schedule, this shared modeling choice may contribute to correlated high-frequency errors. Consistent with this possibility, their mutual FSC remains above 0.143 up to the 2.7\,\AA\ grid limit and is 0.61 at 3.5\,\AA. Developing a reliable resolution estimate for Gaussian maps and evaluating STAGS on asymmetric and in situ datasets are important next steps.
