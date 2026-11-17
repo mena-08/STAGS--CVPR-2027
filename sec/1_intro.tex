@@ -1,33 +1,35 @@
 \section{Introduction}
 \label{sec:intro}
 
-Cryo-electron tomography (cryo-ET) images frozen-hydrated specimens, from purified assemblies to intact cells, as tilt series of low-dose projections.
+Cryo-electron tomography (cryo-ET) records a frozen-hydrated specimen, from a purified assembly to an intact cell, as a tilt series of low-dose projections.
 Subtomogram averaging (STA) turns the many copies of a macromolecule in these tomograms into one high-resolution structure: particles are located, their orientations and positions are estimated, and their aligned signal is averaged~\cite{castanodiez2012dynamo,himes2018emclarity,chen2019eman2,tegunov2021m,zivanov2022relion4,burt2024relion5}.
-At the best current resolutions, the average must also correct how each tilt image was acquired: defocus and astigmatism, accumulated exposure, errors in the tilt-series alignment, and beam-induced motion of every particle~\cite{grant2015dose,zivanov2019polishing,tegunov2021m}.
+At the best current resolutions, the average must also correct how each tilt image was acquired: the microscope's contrast transfer function (CTF), set by defocus and astigmatism, the accumulated exposure, errors in the tilt-series alignment, and beam-induced motion of every particle~\cite{grant2015dose,zivanov2019polishing,tegunov2021m}.
 Each correction needs a reference good enough to predict the images, so pipelines alternate reconstruction, pose search and refinement for many rounds.
-On the RELION-5 tutorial dataset (EMPIAR-10164~\cite{schur2016hiv,iudin2023empiar}), the stored logs report 12.4\,h for auto-refinement and 24.1\,h to the final 3.3\,\AA\ map after five rounds of CTF refinement, Bayesian polishing and refinement~\cite{burt2024relion5}.
+On the RELION-5 tutorial dataset (EMPIAR-10164~\cite{schur2016hiv,iudin2023empiar}), the stored logs report 12.4\,h for auto-refinement and 24.1\,h to the final 3.3\,\AA\ map after five further rounds, each of CTF refinement, Bayesian polishing and refinement~\cite{burt2024relion5}.
 % src: docs/final-campaign-nov13.md (RELION job023 12.4 h, job078 24.1 h from its logs); docs/relion5-paper-table4.md
 
 In these pipelines the structure is a voxel grid.
-A voxel map is the natural output of back-projection but an indirect reference for everything else: projections for pose search are interpolated from its gridded transform, the map is reconstructed anew after every change of poses, defocus or motion, and geometry, optics and motion are refined by separate procedures.
-Its size is fixed by the box, not by the structure.
+A voxel map is the natural output of back-projection but an indirect reference for everything else: projections for pose search are interpolated from its gridded transform, and the map is reconstructed anew after every change of poses, defocus or motion.
+Geometry, optics and motion are refined by separate procedures.
+The map's size is fixed by the box, not by the structure.
 
 We argue that a mixture of 3D Gaussians is a better working representation for STA.
-It is \emph{analytic}: the Fourier transform of an anisotropic Gaussian is a Gaussian with a phase ramp, so a projection in any direction is evaluated exactly rather than interpolated from a reconstructed volume.
-It is \emph{differentiable} in the structure, the particle pose, the tilt geometry and the particle motion, so all of them can be refined against one image model.
-It is \emph{compact and adaptive}: Gaussians are placed where density is, and their number grows with the resolution being fitted.
-Gaussian mixtures have long served cryo-EM for map fitting~\cite{kawabata2008gmm}, initial models~\cite{joubert2015gmm} and heterogeneity analysis~\cite{chen2021e2gmm,chen2023gmm}, and Gaussian splatting made differentiable Gaussian rendering fast~\cite{kerbl2023gaussian}, including for tomography~\cite{zha2024r2gaussian}.
-Recent work fits Gaussians to single-particle images with known poses~\cite{chen2026cryosplat,qu2025gem} and uses a Gaussian mixture as an alignment reference on cryo-ET sub-tilt series~\cite{chen2026gmmfocused}.
+It is \emph{analytic}: the Fourier transform of an anisotropic Gaussian is a Gaussian with a phase ramp (\cref{eq:ft}), so a projection in any direction is evaluated exactly rather than interpolated from a reconstructed volume.
+It is \emph{differentiable} in the structure, the particle pose, the tilt geometry and the particle motion, so all of them can be refined against one image model~\cite{kerbl2023gaussian,chen2021e2gmm}.
+It is \emph{compact and adaptive}: Gaussians are placed where density is, and their number grows with the resolution being fitted~\cite{kerbl2023gaussian}.
+Gaussian mixtures have long served cryo-EM~\cite{kawabata2008gmm,joubert2015gmm,chen2021e2gmm}, and recent work fits them to single-particle images with known poses~\cite{chen2026cryosplat,qu2025gem} or uses them as an alignment reference on cryo-ET sub-tilt series~\cite{chen2026gmmfocused} (\cref{sec:related}).
 To our knowledge, however, no STA pipeline uses a Gaussian mixture as the map in every stage, from pose search to polishing, fitted directly to the tilt images of real data.
 
-We present STAGS (\underline{S}ub\underline{t}omogram \underline{A}veraging with \underline{G}aussian \underline{S}platting), which does this (\cref{fig:teaser}).
-For each independent half-set, STAGS fits anisotropic 3D Gaussians to the 2D tilt-image crops of its particles through a forward model with the contrast transfer function (CTF) and exposure filter of each tilt image.
-GPU kernels that evaluate the mixture's closed-form Fourier transform drive every stage: exact projections for the global pose search, tabulated central slices for local searches, map fitting with densification along a coarse-to-fine resolution ladder, and gradients for polishing per-tilt geometry and per-particle motion.
+To fill this gap, we present STAGS (\underline{S}ub\underline{t}omogram \underline{A}veraging with \underline{G}aussian \underline{S}platting; \cref{fig:teaser}).
+Because each particle copy is very noisy, a map fitted to all of them can fit the noise and look sharper than it is.
+As in the gold-standard practice of cryo-EM, the particles are therefore split into two \emph{half-sets} whose maps are fitted separately; the Fourier shell correlation (FSC) between the two half maps then measures resolution without rewarding such overfitting~\cite{scheres2012relion,rosenthal2003fsc}.
+For each half-set, STAGS fits anisotropic 3D Gaussians to the 2D tilt-image crops of its particles through a forward model with the CTF and exposure filter of each tilt image.
+GPU kernels that evaluate the mixture's closed-form Fourier transform drive every stage: exact projections for the coarse global pose search, slices of a finely sampled table of the transform for local searches, map fitting with densification along a coarse-to-fine resolution ladder, and gradients for refining tilt geometry and particle motion.
 Our contributions are:
 \begin{itemize}
-\item A formulation of STA in which a Gaussian mixture, evaluated through its closed-form Fourier transform, is the reference for pose search, map fitting and polishing, fitted directly to CTF-premultiplied tilt-image crops (\cref{sec:method}).
-\item A complete GPU pipeline around this model, with global and local pose search, densification, exact Fourier-phase translation refinement, per-tilt optics estimation, and gradient-based polishing of tilt geometry and particle motion (\cref{sec:method}).
-\item On EMPIAR-10164, from the initial picks and RELION's preprocessing, STAGS reaches 3.27 and 3.25\,\AA\ against RELION's opposite half maps, which agree with each other at 3.28\,\AA, in 4.3\,h on two GPUs; side-by-side renderings with identical processing show where RELION's map remains better (\cref{sec:results}).
+\item A formulation of STA in which a Gaussian mixture, evaluated through its closed-form Fourier transform, is the reference for pose search, map fitting and polishing, fitted directly to the tilt-image crops through one image likelihood (\cref{sec:method}).
+\item A complete GPU pipeline around this model: global and local pose search with map fitting from coarse to fine resolution, then refinement cycles of poses, per-tilt optics, tilt geometry and particle motion against the same model (\cref{sec:method}).
+\item On EMPIAR-10164, a C6-symmetric lattice benchmark, from the initial picks and RELION's preprocessing, STAGS reaches 3.27 and 3.25\,\AA\ against RELION's opposite half maps, which agree with each other at 3.28\,\AA, in 4.3\,h on two GPUs; side-by-side renderings with identical processing show where RELION's map remains better (\cref{sec:results}).
 % src: runs/engine/pose_abc_adopt_20261113/blind/comparison.json
 \item A fixed-pose comparison at equal particle counts, with a map-only control: fitting Gaussians to the tilt images yields higher map agreement than voxel reconstruction from the same particles (\cref{sec:results}).
 \end{itemize}

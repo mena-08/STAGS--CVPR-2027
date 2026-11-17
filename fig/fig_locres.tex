@@ -1,10 +1,13 @@
-\begin{figure*}[t]
+\begin{figure}[t]
 \centering
-% src: fig/abc_locres.png by scripts/paper_figures_abc.py (render --paper); numbers: docs/paper/fig_abc_provenance.json (local_resolution); docs/paper/fig_abc_locres.csv
-\includegraphics[width=\textwidth]{fig/abc_locres.png}
-\caption{\textbf{Local resolution with one estimator for both maps.}
-Top and side views of the central hexamer (surfaces as in the supplementary \cref{fig:views}), colored on one scale by windowed FSC~0.143 (40\,px box, cosine sphere from 10.8 to 18.9\,\AA, every 3\,px, phase-randomization correction beyond 20\,\AA); right, the distribution over all window centers inside RELION's mask.
+% src: fig/abc_locres.png by scripts/paper_figures_abc.py (render --paper; colour range = 2-98th percentile of surface values, 3.00-3.45 A); numbers: docs/paper/fig_abc_provenance.json (local_resolution); docs/paper/fig_abc_locres.csv
+\includegraphics[width=\columnwidth]{fig/abc_locres.png}
+\caption{\textbf{Local resolution of the two maps.}
+Top and side views of the central hexamer, RELION-5 left and STAGS right, both filtered and contoured identically.
+Each point is colored by the local resolution around it: the FSC is computed only inside a 54\,\AA\ window centered there, and its 0.143 crossing gives the value, repeated every 4\,\AA\ across the map.
 RELION-5: its half 1 against half 2 (median 3.26\,\AA).
-STAGS: each half against the opposite RELION-5 half (median 3.20\,\AA), which measures agreement with RELION, because STAGS's own half maps stay above FSC~0.143 up to Nyquist.}
+STAGS: each half against the opposite RELION-5 half (median 3.20\,\AA), which measures agreement with RELION (\cref{sec:results:setup}).
+Blue is finer detail.
+The scale is narrow (3.0--3.45\,\AA), so the colors exaggerate small differences.}
 \label{fig:locres}
-\end{figure*}
+\end{figure}
