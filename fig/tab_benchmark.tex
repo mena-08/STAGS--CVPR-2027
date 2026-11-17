@@ -13,18 +13,11 @@ Method & Resolution at FSC 0.143 (\AA) $\downarrow$ & FSC at 3.5\,\AA\ $\uparrow
 \bottomrule
 \end{tabular}
 \caption{\textbf{End-to-end benchmark on EMPIAR-10164.}
-Each method starts from the same particle picks and is shown at two stages: before and after the per-image corrections of optics, tilt geometry and particle motion.
-Columns 2--4 give the cross-FSC (\cref{sec:results:setup}): each half map of a method against the opposite half map of the polished RELION-5 reconstruction, computed from the other half of the particles.
-The two values are half 1 and half 2.
-In the last row the two compared maps are RELION's own half maps, so both values are equal and give RELION's standard resolution estimate.
-Column 5 compares the average of the two half maps with the deposited atomic model (PDB 5L93).
-All maps are scored by the same procedure.
-Bold marks the better value of the two methods at each stage.
-STAGS times are wall-clock times from the picks on two RTX PRO 6000 Blackwell GPUs.
-$^\dagger$4.33\,h when initial particle extraction and scoring are included.
+Both methods start from the same initial particle picks and are evaluated before and after per-image refinement (optics, tilt geometry, and particle motion). Columns 2–4 report cross-FSC (\cref{sec:results:setup}) of each half-map (half 1 / half 2) against the opposite polished RELION-5 half-map; for RELION-5 (polished), this equals its standard half-map FSC. Column 5 reports FSC 0.5 against the 5L93 atomistic model. $^\dagger$4.33 h including initial extraction. $^\ddagger$Cumulative time from RELION-5 tutorial logs (includes particle selection;~\cite{burt2024relion5} reports 13 h + 3.4 h/round on 2× RTX 4090).
+%Each method starts from the same particle picks and is shown at two stages: before and after the per-image corrections of optics, tilt geometry and particle motion. Columns 2--4 give the cross-FSC (\cref{sec:results:setup}): each half map of a method against the opposite half map of the polished RELION-5 reconstruction, computed from the other half of the particles. The two values are half 1 and half 2. In the last row the two compared maps are RELION's own half maps, so both values are equal and give RELION's standard resolution estimate. Column 5 compares the average of the two half maps with the deposited atomic model (PDB 5L93). All maps are scored by the same procedure. Bold marks the better value of the two methods at each stage. STAGS times are wall-clock times from the picks on two RTX PRO 6000 Blackwell GPUs. $^\dagger$4.33\,h when initial particle extraction and scoring are included.
 % src: runs/engine/pose_abc_adopt_20261113/blind/wall_clock.json (wall_min 259.49)
-$^\ddagger$Cumulative times from the picks in the logs of the RELION-5 tutorial project, recorded on other hardware, including the 3D classification that selected the particles used by both methods.
-The RELION-5 paper reports 13\,h from the picks to its first unbinned map and 3.4\,h per polishing round on two RTX 4090 GPUs~\cite{burt2024relion5}.
+%$^\ddagger$Cumulative times from the picks in the logs of the RELION-5 tutorial project, recorded on other hardware, including the 3D classification that selected the particles used by both methods.
+%The RELION-5 paper reports 13\,h from the picks to its first unbinned map and 3.4\,h per polishing round on two RTX 4090 GPUs~\cite{burt2024relion5}.
 % src: docs/relion5-paper-table4.md (13 h 04 min; 3 h 22 min)
 }
 \label{tab:benchmark}

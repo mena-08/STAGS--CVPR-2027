@@ -2,6 +2,20 @@
 \setcounter{page}{1}
 \maketitlesupplementary
 
+% Own numbering (Sec. S1, Tab. S1, Fig. S1, Eq. (S1)), so supplement items cannot be mistaken for the paper's.
+\setcounter{section}{0}
+\setcounter{table}{0}
+\setcounter{figure}{0}
+\setcounter{equation}{0}
+\renewcommand{\thesection}{S\arabic{section}}
+\renewcommand{\thetable}{S\arabic{table}}
+\renewcommand{\thefigure}{S\arabic{figure}}
+\renewcommand{\theequation}{S\arabic{equation}}
+\renewcommand{\theHsection}{S\arabic{section}}
+\renewcommand{\theHtable}{S\arabic{table}}
+\renewcommand{\theHfigure}{S\arabic{figure}}
+\renewcommand{\theHequation}{S\arabic{equation}}
+
 \input{sec/X_suppl_method}
 
 \section{Evaluation details}
@@ -11,21 +25,23 @@ The atomic model 5L93 is registered rigidly once, at 40--20\,\AA\ against RELION
 % src: docs/results-stags-next-evaluation.md (model validation: registration 40-20 A, shared by every method)
 Crossings are the first downward crossing between adjacent valid shells, linearly interpolated in frequency; the band mean over 3.6--3.28\,\AA\ weights the eight native shells equally.
 % src: runs/engine/pose_abc_adopt_20261113/blind/comparison.json (crossing_definition, band_definition)
-STAGS's own two half maps share structure at 3.3--3.5\,\AA\ that RELION's maps do not contain (shared Gaussian texture or shared pose bias, not yet separated), which is why their mutual FSC is not used as a resolution estimate.
+%STAGS's own two half maps share structure at 3.3--3.5\,\AA\ that RELION's maps do not contain (shared Gaussian texture or shared pose bias, not yet separated), which is why their mutual FSC is not used as a resolution estimate.
 % src: docs/final-campaign-nov13.md (swap diagnostic: own gold FSC 0.45 at 3.5 A vs cross-FSC 0.22/0.19)
-Run~E is an earlier STAGS run with the previous recipe (3.343/3.396\,\AA). The final run used the same picks, ladder, budgets and stopping rule as run~E; besides the three pose corrections, 14 source or configuration files differ from run~E, so the difference between the two runs (0.074/0.145\,\AA\ in crossing, 0.036/0.052 in band mean) is not a clean ablation.
+%Run~E is an earlier STAGS run with the previous recipe (3.343/3.396\,\AA). The final run used the same picks, ladder, budgets and stopping rule as run~E; besides the three pose corrections, 14 source or configuration files differ from run~E, so the difference between the two runs (0.074/0.145\,\AA\ in crossing, 0.036/0.052 in band mean) is not a clean ablation.
 % src: docs/final-campaign-nov13.md (Fresh-run launch verification: fourteen hashes differ); runs/engine/pose_abc_adopt_20261113/completion_review.json (gain_vs_E_crossing_A, gain_vs_E_band_mean)
+
+Because both STAGS half-maps are parameterized by continuous Gaussian kernels under identical densification schedules, they share a high-frequency spectral envelope at 3.3–3.5 Å absent from discrete voxel back-projections; cross-FSC against the opposite RELION-5 half-map eliminates this shared-basis correlation.
 
 \section{Additional comparison with RELION-5}
 \label{sec:suppl:visual}
 
 \Cref{fig:views} shows both maps rendered identically and \cref{fig:slices} central sections without masking.
-\Cref{fig:locres_cumulative} shows the distribution of the local-resolution values of \cref{fig:locres} over all window centers inside the mask.
+\Cref{fig:locres_cumulative} shows the distribution of the local-resolution values of \mainref{fig:locres} over all window centers inside the mask.
 73\,\% (RELION-5) and 83\,\% (STAGS) of them are finer than 3.5\,\AA.
 % src: docs/paper/fig_abc_provenance.json (local_resolution.summary: fraction_finer_than_3_5A relion 0.7336, stags 0.8310)
 Windows coarser than 4\,\AA\ make up 13\,\% for RELION and 8\,\% for STAGS, and most of them lie within 10\,\AA\ of the mask boundary, so they reflect the mask edge rather than the structure.
 % src: docs/paper/fig_abc_provenance.json (local_resolution.summary: fraction_coarser_than_4A 0.133 / 0.075; coarse_within_10A_of_mask_edge 0.72 / 0.79 vs all windows 0.48)
-The RELION-5 paper does not list the regions of its Fig.~6C; for \cref{fig:closeups} we recovered them by a joint silhouette match of 5L93 atoms and RELION density to the published panels, with leads of 1.59, 0.71 and 0.46\,px over the next distinct region.
+The RELION-5 paper does not list the regions of its Fig.~6C; for \mainref{fig:closeups} we recovered them by a joint silhouette match of 5L93 atoms and RELION density to the published panels, with leads of 1.59, 0.71 and 0.46\,px over the next distinct region.
 % src: docs/paper/fig_abc_fig6c_regions.json; docs/final-campaign-nov13.md (Visual comparison)
 
 \input{fig/fig_views}
@@ -94,7 +110,7 @@ The map-only fits approximate their targets with a relative $L_2$ error of 0.98,
 \section{Pipeline stage decisions}
 \label{sec:suppl:part2}
 
-Before the pose corrections of \cref{sec:suppl:ablation}, each stage of the pipeline was revisited with a predeclared keep rule on a short proxy: a cold map fit from the stage's output, or one refinement cycle, scored as in \cref{sec:results:setup}.
+Before the pose corrections of \cref{sec:suppl:ablation}, each stage of the pipeline was revisited with a predeclared keep rule on a short proxy: a cold map fit from the stage's output, or one refinement cycle, scored as in \mainref{sec:results:setup}.
 \Cref{tab:part2} lists every tested change.
 The proxies have a noise floor of about $\pm$0.02--0.03\,\AA, visible as gains of opposite sign on the two halves.
 % src: docs/final-campaign-nov13.md (Part 2, stage2_fit note: proxy noise floor)

@@ -27,9 +27,9 @@ For each half-set, STAGS fits anisotropic 3D Gaussians to the 2D tilt-image crop
 GPU kernels that evaluate the mixture's closed-form Fourier transform drive every stage: exact projections for the coarse global pose search, slices of a finely sampled table of the transform for local searches, map fitting with densification along a coarse-to-fine resolution ladder, and gradients for refining tilt geometry and particle motion.
 Our contributions are:
 \begin{itemize}
-\item A formulation of STA in which a Gaussian mixture, evaluated through its closed-form Fourier transform, is the reference for pose search, map fitting and polishing, fitted directly to the tilt-image crops through one image likelihood (\cref{sec:method}).
-\item A complete GPU pipeline around this model: global and local pose search with map fitting from coarse to fine resolution, then refinement cycles of poses, per-tilt optics, tilt geometry and particle motion against the same model (\cref{sec:method}).
-\item On EMPIAR-10164, a C6-symmetric lattice benchmark, from the initial picks and RELION's preprocessing, STAGS reaches 3.27 and 3.25\,\AA\ against RELION's opposite half maps, which agree with each other at 3.28\,\AA, in 4.3\,h on two GPUs; side-by-side renderings with identical processing show where RELION's map remains better (\cref{sec:results}).
+\item A formulation of STA in which a Gaussian mixture, evaluated through its closed-form Fourier transform, is the reference for pose search, map fitting and polishing, fitted directly to the tilt-image crops through one image likelihood.
+\item A complete GPU pipeline around this model: global and local pose search with map fitting from coarse to fine resolution, then refinement cycles of poses, per-tilt optics, tilt geometry and particle motion against the same model.
+\item On EMPIAR-10164, a C6-symmetric lattice benchmark, from the initial picks and RELION's preprocessing, STAGS reaches 3.27 and 3.25\,\AA\ against RELION's opposite half maps, which agree with each other at 3.28\,\AA, in 4.3\,h on two GPUs; and we analyze the trade-offs between continuous Gaussian representations and discrete voxel grids at atomistic resolution.
 % src: runs/engine/pose_abc_adopt_20261113/blind/comparison.json
-\item A fixed-pose comparison at equal particle counts, with a map-only control: fitting Gaussians to the tilt images yields higher map agreement than voxel reconstruction from the same particles (\cref{sec:results}).
+\item A fixed-pose comparison at equal particle counts, with a map-only control: fitting Gaussians to the tilt images yields higher map agreement than voxel reconstruction from the same particles.
 \end{itemize}
