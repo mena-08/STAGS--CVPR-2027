@@ -1,27 +1,16 @@
 \begin{strip}
 \centering
-% src: fig/teaser.pdf = python scripts/paper_cvpr_teaser.py (CPU only); every panel and number is computed there from
-%   runs/engine/pose_abc_adopt_20261113/blind (half-set 1 unless both halves are given); per-panel sources and the
-%   printed values: docs/paper/paper_cvpr_teaser_provenance.json
-% src (panel numbers): K 1,056 / 2,418 / 4,296 / 25,998 = lean/{seed,ladder}/h1/model_*.pt (asu x 6);
-%   K 48,000 = kb/h1/fit0/B_4536_model.pt (8,000 x 6); crossings = lean/timing.json stages.*.h1xR2_A (ladder),
-%   report.json scores.*.cc (fit0 3.904 / 4.063 A, cycles 3.370, 3.325, 3.307, 3.269 / 3.251 A);
-%   RELION-5 3.28 A and 24.1 h = comparison.json rows["RELION job078"] (3.2836 / 3.2844 A; wall_hours 24.1);
-%   times = lean/timing.json + run_abc.log (ladder 89.2 min, prep 4.6 min) + report.json (fit 19.4 min,
-%   cycles 37.1 / 35.9 / 35.4 / 34.6 min; wall_min 256.2 = 4.27 h); r = 0.17 = correlation of the -3 deg tilt of
-%   particle TS_01/3312 with its 16 A prediction (median of its 17 tilts; range 0.10-0.25)
-\includegraphics[width=\textwidth]{fig/teaser_v2.pdf}
+% src: fig/teaser_v3.pdf = python scripts/paper_cvpr_teaser_v3.py (CPU only; reuses the cached panels of
+%   scripts/paper_cvpr_teaser.py); every render and number is computed there from runs/engine/pose_abc_adopt_20261113/blind
+%   (half-set 1 unless both halves are given) and RELION job078; printed values: docs/paper/paper_cvpr_teaser_v3_provenance.json
+% src (numbers): crossings 3.269 / 3.251 A (STAGS) and 3.284 A (RELION-5 polished) = comparison.json cross_fsc0143_A;
+%   4.27 h = lean/timing.json wall (256.2 min, picks to final map); 24.1 h = comparison.json RELION job078 wall_hours;
+%   K = 48,000 = kb/h1/fit0/B_4536_model.pt; ladder K = lean/{seed,ladder}/h1/model_{16,12,10,5.5}.pt (with the C6 copies)
+\includegraphics[width=\textwidth]{fig/teaser_v3.pdf}
 \captionsetup{hypcap=false}
-\captionof{figure}{\textbf{STAGS step by step on EMPIAR-10164 (half-set~1; \cref{sec:method}).}
-(1)~Initial picks (drawn on RELION's denoised tomogram, display only) give tilt-image crops of each particle.
-(2)~The Gaussian map is a C6-symmetric mixture of anisotropic 3D Gaussians with a closed-form Fourier transform (model after the first, 16\,\AA\ level shown).
-(3)~A candidate pose is scored by comparing each observed tilt-image crop with the crop predicted from the map (one tilt shown; $r$ is their correlation).
-(4)~A resolution ladder alternates pose search and map fitting, splitting Gaussians as resolution increases.
-(5)~With the poses fixed, a new model with $K=48{,}000$ Gaussians is fitted over all frequencies: Gaussians (left) and the map they define (right).
-(6)~Four refinement cycles re-estimate poses, per-tilt optics, tilt geometry and particle motion and refit the map.
-Shown are each cycle's per-tilt defocus changes and particle tracks (magnified 100$\times$).
-(7)~Final map (average of both halves), colored by subunit.
-Bottom: wall clock from the picks; blue numbers are FSC~0.143 crossings of each STAGS half map against the opposite RELION-5 half map (cross-FSC, \cref{sec:results:setup}). RELION's time comes from its logs on other hardware.}
+\captionof{figure}{\textbf{STAGS on EMPIAR-10164.}
+A single set of anisotropic 3D Gaussians is projected analytically and fitted directly to the tilt images of the picked particles; the same model drives pose search, coarse-to-fine map fitting and polishing (\cref{sec:method}).
+Maps show the central hexamer; resolutions are FSC~0.143 crossings against RELION's opposite half maps (\cref{sec:results:setup}); RELION's time comes from its logs on other hardware.}
 \captionsetup{hypcap=true}
 \label{fig:teaser}%
 \end{strip}
