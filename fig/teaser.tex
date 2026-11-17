@@ -1,16 +1,16 @@
 \begin{strip}
 \centering
-% src: fig/teaser_v3.pdf = python scripts/paper_cvpr_teaser_v3.py (CPU only; reuses the cached panels of
+% src: fig/teaser_v4.pdf = python scripts/paper_cvpr_teaser_v4.py (CPU only; reuses the cached panels of
 %   scripts/paper_cvpr_teaser.py); every render and number is computed there from runs/engine/pose_abc_adopt_20261113/blind
-%   (half-set 1 unless both halves are given) and RELION job078; printed values: docs/paper/paper_cvpr_teaser_v3_provenance.json
+%   (half-set 1 unless both halves are given) and RELION job078
 % src (numbers): crossings 3.269 / 3.251 A (STAGS) and 3.284 A (RELION-5 polished) = comparison.json cross_fsc0143_A;
 %   4.27 h = lean/timing.json wall (256.2 min, picks to final map); 24.1 h = comparison.json RELION job078 wall_hours;
-%   K = 48,000 = kb/h1/fit0/B_4536_model.pt; ladder K = lean/{seed,ladder}/h1/model_{16,12,10,5.5}.pt (with the C6 copies)
-\includegraphics[width=\textwidth]{fig/teaser_v3.pdf}
+%   K = 48,000 = kb/cycle4/p3_h1/B_4536_model.pt (final model); 1,056 / 4,296 = lean/seed/h1/model_16.pt, lean/ladder/h1/model_10.pt (with the C6 copies)
+\includegraphics[width=\textwidth]{fig/teaser_v4.pdf}
 \captionsetup{hypcap=false}
 \captionof{figure}{\textbf{STAGS on EMPIAR-10164.}
-A single set of anisotropic 3D Gaussians is projected analytically and fitted directly to the tilt images of the picked particles; the same model drives pose search, coarse-to-fine map fitting and polishing (\cref{sec:method}).
-Maps show the central hexamer; resolutions are FSC~0.143 crossings against RELION's opposite half maps (\cref{sec:results:setup}); RELION's time comes from its logs on other hardware.}
+One set of anisotropic 3D Gaussians is fitted directly to the tilt images of the picked particles, gaining Gaussians as resolution increases (central hexamer shown); the same model refines the particle poses, tilt geometry and particle motion.
+Below the maps: FSC~0.143 crossing against RELION's opposite half maps (\cref{sec:results:setup}) and time from the picks (RELION from its logs, other hardware).}
 \captionsetup{hypcap=true}
 \label{fig:teaser}%
 \end{strip}
