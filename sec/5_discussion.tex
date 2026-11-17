@@ -1,11 +1,16 @@
-\section{Discussion and Limitations}
+\section{Limitations}
 \label{sec:discussion}
 
-STAGS uses a single Gaussian mixture throughout an STA pipeline, from pose search to polishing. On EMPIAR-10164, its cross-FSC crossings are close to RELION-5's half-map FSC crossing, while the recorded STAGS run is shorter. The runs used different hardware and processing scopes.
-
-\paragraph{Limitations.}
 STAGS's own half-map FSC remains above 0.143 through Nyquist, so it does not provide a usable gold-standard resolution estimate. We therefore report cross-FSC agreement with RELION's half maps. RELION also agrees better with the atomic model (FSC~0.5 at 3.86\,\AA\ versus 4.04\,\AA\ for STAGS).
 % src: runs/engine/pose_abc_adopt_20261113/blind/scores/cycle4/results.json (gold: no 0.143 crossing); comparison.json (atomic 3.86 / 4.04 A)
-The evaluation uses RELION's particle selection and mask volume, and the final pose recipe was chosen after proxy runs were scored (\cref{sec:results:ablation}). All real-data results are from one symmetric, lattice-forming benchmark. Runtime comparisons also use different hardware.
+The evaluation uses RELION's particle selection and mask volume, and the final pose recipe was chosen after proxy runs were scored (\cref{sec:results:ablation}). The end-to-end result is a single run without replicates, and all real-data results are from one symmetric, lattice-forming benchmark. Runtime comparisons also use different hardware.
 % src: engine_rules.json steps.pose_abc_adopt_20261113; runs/engine/inputs/provenance.json
 Future work should establish an intrinsic resolution estimate for Gaussian maps, evaluate fully independent half-sets, and test in situ data.
+
+\section{Conclusion}
+\label{sec:conclusion}
+
+STAGS uses a single Gaussian mixture, projected analytically through its closed-form Fourier transform, as the reference for every stage of an STA pipeline, from pose search to map fitting and polishing.
+On EMPIAR-10164, starting from the initial picks, its cross-FSC crossings are close to RELION-5's half-map FSC crossing in a shorter recorded run, while RELION's map agrees better with the atomic model.
+With poses fixed, fitting Gaussians to the tilt images gives better maps than voxel reconstruction from the same particles, and the controls support image-level fitting as a source of this gain.
+These results suggest that a compact, differentiable map representation is a practical basis for STA, and that resolution estimation for Gaussian maps and evaluation beyond a single benchmark are the main steps that remain.

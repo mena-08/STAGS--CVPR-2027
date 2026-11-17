@@ -53,7 +53,6 @@ Its half maps reach the cross-FSC threshold of 0.143 at 3.269 and 3.251\,\AA, ag
 The polished map remains ahead just coarser than this point (mean FSC 0.244 against 0.228/0.226) and in agreement with the atomic model (3.86 against 4.04\,\AA).
 % src: blind/comparison.json (band means; atomic_merged_fsc05_A)
 The crossing margins (0.014/0.033\,\AA) come from a single run without replicates, so the crossings indicate similar values in this run, rather than evidence that STAGS improves on RELION.
-\TODO{Remove before submission. Replicates: rerun the final recipe from the picks with new random seeds (initial Gaussians, particle batches), 4.3\,h per run on the same two GPUs, so 2 repeats take about 9\,h run back to back. The pipeline currently fixes its seeds, so a seed option must be added first. The spread of the 0.143 crossings over 3 runs tells whether the 0.014/0.033\,\AA\ margins over RELION exceed run-to-run variation (then a small gain could be claimed) or not (parity stands), and whether RELION's lead in band mean and atomic agreement is consistent.}
 % src: completion_review.json (gain_vs_RELION_crossing_A)
 Comparing the two stages shows that the refinement cycles carry most of the improvement.
 Before polishing, STAGS crosses at 3.90/4.06\,\AA, compared with 3.65/3.63\,\AA\ for RELION's auto-refined map. After four cycles, its crossings are close to those of RELION's polished map.
@@ -114,9 +113,9 @@ In the three subsets, RELION's map from 500 particles scores higher still (last 
 A second study with five new draws and a regularized voxel solver confirms the gain (row ii).
 % src: runs/particle_efficiency_20261102/results.json
 These results hold at low resolution and small particle counts.
-Details and limitations, including a fitting recipe chosen after the planned one failed, are in \cref{sec:suppl:efficiency}.
+The Gaussian recipe was chosen after the planned one failed, with its result on subset 1 already known, so subsets 2 and 3, fitted afterwards with the recipe unchanged, give the unbiased confirmation; it was also tuned during development, whereas the voxel map uses RELION's defaults.
+Details and limitations are in \cref{sec:suppl:efficiency}.
 % src: docs/results-limited250-primary-20261103.md (planned ray/TPGA fits 0.243/0.248 vs 0.509); runs/step2_parity_20261103/decision.json
-\TODO{Remove before submission. Open question on the fitting recipe. The issue: the study planned a Gaussian fit to the unprocessed crops at full sampling, without removing neighboring density. That fit stalled and scored 0.243 against the voxel map's 0.509 on subset 1. The reported Gaussian maps use an older recipe from earlier development (CTF-premultiplied crops, $1.5\times$ binning, neighboring density removed with a voxel map of the same particles), chosen after that failure and already known to score well on subset 1. Subsets 2 and 3 were fitted afterwards with it unchanged and confirm the gain. My (Matus's) oppinion: this is not a problem, because the experiment is run in fair conditions, both methods start from the same particles, poses, optics and mask and are scored identically, so the comparison is fair. Claudes oppinion: agree that the comparison is fair in its inputs and scoring and that the numbers are real. The remaining weakness is selection: on subset 1 the recipe was chosen knowing its result, so subsets 2 and 3 carry the unbiased evidence. The Gaussian recipe was also tuned during development while the voxel map uses RELION's defaults, which the smoothing control only partly offsets. Suggest stating both in one sentence here, so that reviewers see the selection and the confirmation together.}
 
 \subsection{Ablation of the refinement cycle}
 \label{sec:results:ablation}
