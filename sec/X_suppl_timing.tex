@@ -1,0 +1,66 @@
+\section{Run time and run-to-run variation}
+\label{sec:suppl:timing}
+
+We ran the adopted recipe twice, blind from the initial picks, on two machines.
+Run~1 used a workstation with $2\times$ RTX PRO 6000 Blackwell Max-Q Workstation Edition (96\,GB each), a 48-thread Xeon Silver 4510 and 125\,GB RAM.
+Run~2 used a workstation with $2\times$ RTX 4090 (24\,GB each), a 32-core Threadripper PRO 3975WX and 251\,GB RAM.
+% src: docs/paper/supp_hardware.txt (lscpu, free -g, nvidia-smi of both hosts)
+A third GPU in the second workstation (RTX 5070 Ti) computed only the reporting scores, which do not count toward the run time.
+% src: docs/paper/supp_hardware.txt; runs/engine/abc_4090_20261117/launch.json (machine_env STAGS_SCORE_GPU=0, STAGS_HALF_GPUS=1,2)
+In both runs each half-set runs on its own GPU.
+The wall clock from the picks to the final map is 256.2\,min (4.27\,h) in run~1 and 263.2\,min (4.39\,h) in run~2 (\cref{tab:suppl:stages}).
+% src: runs/engine/pose_abc_adopt_20261113/blind/report.json (wall_min 256.2256); runs/engine/abc_4090_20261117/full_logs/report.json (wall_min 263.1905); docs/paper/supp_timing_numbers.json (wall_min, wall_h)
+Run~2 was launched four times.
+The first two launches stopped at start-up (a missing configuration file; Triton kernels compiled for the wrong GPU), and the third crashed in the first optics scan on a hard-coded path.
+% src: runs/engine/abc_4090_20261117/run_abc-4090.log (ABORTED lines at +1 min, +4 min, +131 min; cycle 1 scan failed); causes as recorded by the operator
+The first launch stopped after 1\,min, before any timing was recorded, and is not counted.
+% src: runs/engine/abc_4090_20261117/run_abc-4090.log (launched 07:34:57Z, ABORTED 07:35:52Z; partial launch.json/attempts.json moved aside on resume)
+The clock of the remaining three launches is stitched: stages finished before an interruption are credited with their measured time, and partially done work and the interruptions themselves are excluded (footnote of \cref{tab:suppl:stages}).
+% src: runs/engine/abc_4090_20261117/full_logs/report.json (resume); runs/engine/abc_4090_20261117/attempts.json
+
+\input{fig/tab_supp_stages}
+
+\paragraph{Where the time goes.}
+\Cref{tab:suppl:kinds} splits each half's timeline by kind of work, using the stages' own logs.
+Gaussian map fitting takes 83--85\,min per half on the PRO 6000 and 73--74\,min on the RTX 4090.
+Pose search takes 46--47\,min on the PRO 6000 and 72--73\,min on the RTX 4090.
+% src: docs/paper/supp_timing_kinds.csv (map: 84.6/82.6, 72.6/74.0; pose: 46.3/47.0, 73.3/72.3)
+The optics scans take 34 and 42\,min, P1 26--27 and 32\,min, and CPU extraction and preparation 29 and 26\,min.
+% src: docs/paper/supp_timing_kinds.csv (scan 33.7/33.9, 42.1/41.9; p1 26.8/26.2, 31.6/31.6; cpu 29.1/28.6, 26.5/26.4)
+Loading data inside the stages takes 22--30\,min per half on the first machine and 12\,min on the second.
+On the first machine, the optics scans' data reloads alone take 16.7 and 9.3\,min on the two halves.
+% src: docs/paper/supp_timing_kinds.csv (data 30.1/22.0, 12.1/11.7); docs/paper/supp_timing_numbers.json (kinds.run1_h1/h2.scan_data 16.73/9.30)
+The rest is time a half waits for the other half or for the orchestrator: 4.6 and 14.3\,min in run~1 and 3.9 and 4.0\,min in run~2.
+% src: docs/paper/supp_timing_kinds.csv (idle)
+
+\paragraph{Same-hardware comparison with RELION-5.}
+The RELION-5 paper~\cite{burt2024relion5} reports times for the same dataset on $2\times$ RTX 4090 with a 32-core Threadripper PRO 5975WX and 512\,GB RAM: 13\,h\,04\,min from the picks to the first bin-1 map at 4.0\,\AA, and 3\,h\,22\,min per polishing cycle.
+That is about 29.9\,h for the five cycles that reach 3.3\,\AA\ (our sum, assuming every cycle takes as long as the one in their table).
+% src: docs/relion5-paper-table4.md (13 h 4 min; 3 h 22 min; 512 GB RAM; 4.0 A, 3.3 A after five iterations); docs/paper/supp_timing_numbers.json (relion_table4_h.five_cycles_total_our_sum 29.9)
+These RELION-5 times are taken from that table; we did not measure them.
+On the same GPU model, with half the host RAM (251 vs.\ 512\,GB), STAGS takes 4.39\,h from the picks to its final map: a factor of 3.0 below RELION-5's time to its first bin-1 map and 6.8 below its estimated time to 3.3\,\AA.
+% src: docs/paper/supp_hardware.txt (251 GB); docs/paper/supp_timing_numbers.json (wall_h.2 4.387; ratio_relion_over_stages_4090 2.98 / 6.82)
+To fit the 24\,GB cards, the observations stay in host-pinned memory and stream to the GPU, and every stage sizes its chunks from a per-process budget (here capped at 22\,GB).
+% src: stags/relion5_stags.py (pin_memory store); stags/gpu_budget.py (STAGS_GPU_MEM_GB cap, budget_bytes for chunk sizing); runs/engine/abc_4090_20261117/launch.json (STAGS_GPU_MEM_GB 22)
+In the ladder, peak memory per half is then 19.4--19.5\,GB, versus 46.5--46.6\,GB without the cap on the PRO 6000.
+% src: docs/paper/supp_timing_numbers.json (peak_gpu_GB_per_half), from lean/logs/ladder_h{1,2}.log 'peak GPU' lines of both runs
+The computation is the same, only in smaller pieces.
+The results can differ only through the order of reductions and through the random grid sampling of the map fits, whose CUDA random stream depends on the GPU model.
+Run~2 is therefore an independent random realization of the same pipeline, not a copy of run~1.
+
+\paragraph{Run-to-run variation.}
+\Cref{fig:suppl:runs,tab:suppl:runs} compare the final maps of both runs.
+The crossings are 3.269/3.251\,\AA\ in run~1 and 3.294/3.245\,\AA\ in run~2, so they differ between runs by 0.025\,\AA\ on half~1 and 0.007\,\AA\ on half~2.
+% src: docs/paper/supp_timing_runs.csv; docs/paper/supp_timing_numbers.json (run_spread_A 0.0252 / 0.0066)
+Against RELION-5 (3.284/3.284\,\AA), half~1's margin changes sign between runs: STAGS is finer by 0.014\,\AA\ in run~1 and coarser by 0.011\,\AA\ in run~2.
+Half~2 is finer than RELION-5 in both runs, by 0.033 and 0.040\,\AA.
+% src: docs/paper/supp_timing_numbers.json (crossing_job078 3.2836/3.2844; margin_to_job078_A_positive_STAGS_finer: run1 0.0143/0.0332, run2 -0.0109/0.0398)
+With two runs on different GPUs, we cannot tell whether half~2's margin is a stable difference specific to that half.
+We therefore read the crossings as parity with RELION-5, not a lead.
+RELION-5 keeps the lead in both runs for FSC at 3.5\,\AA\ (0.276/0.277 vs.\ 0.243--0.266), band mean (0.244/0.244 vs.\ 0.226--0.234) and atomic agreement (3.86 vs.\ 4.04 and 4.01\,\AA).
+% src: docs/paper/supp_timing_runs.csv (fsc35, band, atomic05_A of both runs and job078)
+\Cref{tab:suppl:resolution} lists the resolution after each stage.
+Both runs end the ladder at 5.7\,\AA, the cold fit at 3.9--4.1\,\AA\ and cycle~1 at 3.37--3.43\,\AA.
+% src: docs/paper/supp_timing_resolution.csv (step4_5.5: 5.671/5.667, 5.731/5.689; fit0: 3.904/4.063, 3.935/4.063; cycle1: 3.370/3.403, 3.372/3.433)
+
+\input{fig/fig_supp_runs}
