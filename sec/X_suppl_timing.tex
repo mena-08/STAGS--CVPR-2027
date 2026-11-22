@@ -4,7 +4,8 @@
 
 We ran the adopted recipe twice, blind from the initial picks, each half-set on its own GPU: run~1 on $2\times$ RTX PRO 6000 Blackwell Max-Q (96\,GB each; Xeon Silver 4510, 125\,GB RAM), run~2 on $2\times$ RTX 4090 (24\,GB each; Threadripper PRO 3975WX, 251\,GB RAM).
 % src: docs/paper/supp_hardware.txt (lscpu, free -g, nvidia-smi of both hosts)
-Picks to final map take 4.27\,h and 4.39\,h (\cref{tab:suppl:stages}); run~2 needed four launches,\footnote{Stops on a missing configuration file, Triton kernels compiled for the wrong GPU and a hard-coded path; the first launch stopped before any timing. A third GPU (RTX 5070 Ti) computed only the untimed reporting scores.} and its clock credits the stages finished before each interruption.
+Picks to final map take 4.27\,h and 4.39\,h (\cref{tab:suppl:stages}), both including the initial extraction; the 4.33\,h of \mainref{tab:benchmark} also counts the background scoring. Run~2 needed four launches,\footnote{Stops on a missing configuration file, Triton kernels compiled for the wrong GPU and a hard-coded path; the first launch stopped before any timing. A third GPU (RTX 5070 Ti) computed only the untimed reporting scores.} and its clock credits the stages finished before each interruption.
+% src: runs/engine/pose_abc_adopt_20261113/blind/wall_clock.json (wall_min 259.49 = 4.33 h, "Original picks through guarded child completion, including background scoring"); report.json (256.23, initial extraction 3.1 min included: fig/tab_supp_stages.tex)
 % src: runs/engine/pose_abc_adopt_20261113/blind/report.json (wall_min 256.2256); runs/engine/abc_4090_20261117/full_logs/report.json (wall_min 263.1905); docs/paper/supp_timing_numbers.json (wall_h)
 % src: runs/engine/abc_4090_20261117/run_abc-4090.log (ABORTED lines at +1 min, +4 min, +131 min; cycle 1 scan failed; first launch 07:34:57Z, ABORTED 07:35:52Z, no timing recorded); causes as recorded by the operator; stitching: runs/engine/abc_4090_20261117/full_logs/report.json (resume); runs/engine/abc_4090_20261117/attempts.json
 % src: docs/paper/supp_hardware.txt; runs/engine/abc_4090_20261117/launch.json (machine_env STAGS_SCORE_GPU=0, STAGS_HALF_GPUS=1,2)
@@ -14,7 +15,8 @@ To fit the 24\,GB cards, observations stay in pinned host memory and every stage
 \paragraph{Same-hardware comparison with RELION-5.}
 On $2\times$ RTX 4090, RELION-5~\cite{burt2024relion5} reports 13\,h\,04\,min from the picks to its first bin-1 map (4.0\,\AA) and 3\,h\,22\,min per polishing cycle, ${\sim}29.9$\,h for the five cycles that reach 3.3\,\AA\ (our sum; times from their table, not re-measured).
 % src: docs/relion5-paper-table4.md (13 h 4 min; 3 h 22 min; 512 GB RAM; 4.0 A, 3.3 A after five iterations); docs/paper/supp_timing_numbers.json (relion_table4_h.five_cycles_total_our_sum 29.9)
-STAGS's 4.39\,h is $3.0\times$ and $6.8\times$ shorter, with half their host RAM (251 vs.\ 512\,GB).
+STAGS's measured 4.39\,h is $3.0\times$ and $6.8\times$ shorter, with half their host RAM (251 vs.\ 512\,GB), and below the 6.5--7.5\,h the main paper estimates for this hardware.
+% src: main paper sec/4_results.tex (6.5-7.5 h estimate on dual RTX 4090)
 % src: docs/paper/supp_hardware.txt (251 GB); docs/paper/supp_timing_numbers.json (wall_h.2 4.387; ratio_relion_over_stages_4090 2.98 / 6.82)
 
 \paragraph{Run-to-run variation.}
