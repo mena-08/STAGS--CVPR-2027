@@ -31,13 +31,14 @@ STAGS's half maps share 3.3--3.5\,\AA\ structure absent from RELION's, so we use
 \section{Additional comparison with RELION-5}
 \label{sec:suppl:visual}
 
-\Cref{fig:views} renders both maps identically; \cref{fig:slices} shows orthogonal central sections.
+\Cref{fig:views} renders both maps identically, \cref{fig:suppl:zooms} zooms into four regions not shown in \mainref{fig:closeups}, and \cref{fig:slices} shows orthogonal central sections.
 Of the local-resolution windows of \mainref{fig:locres}, 73\,\% (RELION-5) and 83\,\% (STAGS) are finer than 3.5\,\AA; the 13\,\% / 8\,\% coarser than 4\,\AA\ lie mostly within 10\,\AA\ of the mask edge.
 % src: docs/paper/fig_abc_provenance.json (local_resolution.summary: fraction_finer_than_3_5A relion 0.7336, stags 0.8310; fraction_coarser_than_4A 0.133 / 0.075; coarse_within_10A_of_mask_edge 0.72 / 0.79 vs all windows 0.48)
 The RELION-5 paper does not list the regions of its Fig.~6C; for \mainref{fig:closeups} we recovered them by jointly matching 5L93 atoms and RELION density to the published silhouettes (leads of 1.59, 0.71 and 0.46\,px over the next distinct region).
 % src: docs/paper/fig_abc_fig6c_regions.json; docs/final-campaign-nov13.md (Visual comparison)
 
 \input{fig/fig_views}
+\input{fig/fig_supp_zooms}
 \input{fig/fig_slices}
 
 \input{sec/X_suppl_timing}
