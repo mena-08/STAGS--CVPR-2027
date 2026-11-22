@@ -59,8 +59,7 @@ a+b+c beats the control at every 3.6--3.28\,\AA\ shell; its failed gate is not r
 \section{Fixed-pose particle efficiency: details}
 \label{sec:suppl:efficiency}
 
-\paragraph{Withheld-tomogram study.}
-Splits withhold TS\_54, TS\_03 or TS\_45; 250 training particles come from the other four tomograms, 200 withheld particles serve only image prediction.
+In the withheld-tomogram study, splits withhold TS\_54, TS\_03 or TS\_45; 250 training particles come from the other four tomograms, 200 withheld particles serve only image prediction.
 % src: runs/native_limited250_20261103/selection.json (train TS_01/03/43/45; 250 train; 200 held out); docs/stags-limited-particle-study-matrix.md
 The Gaussian map (48,000 Gaussians, 2,667 updates of 6 particles) is fitted to RELION's extracted images at 1.5$\times$ binning, after subtracting outside-mask density with the 250-particle voxel map.
 % src: engine_rules.json steps.A3_break_fixed_point.snr_gate.what; runs/step2_parity_20261103/score_primary/results.json (endpoint.recipe_differences)
@@ -72,16 +71,14 @@ RELION-5 with 500 particles is better in all splits (0.620, 0.601, 0.582).
 Held-out prediction barely favors the Gaussian map (normalized error 0.99998 vs.\ 1.00074; untrained 0.99999).
 % src: runs/native_limited250_20261103/native500_score/results.json (loss_over_observed_power); docs/results-limited250-primary-20261103.md (zero-update 0.99999)
 
-\paragraph{Controls.}
-Fitting the same Gaussian initialization and schedule to the voxel-250 map (first split, one run) scores 0.508 vs.\ 0.509 (voxel) and 0.570 (image fit), 5L93 crossing 15.6\,\AA.
+Two controls separate the image objective from the Gaussian representation. Fitting the same Gaussian initialization and schedule to the voxel-250 map (first split, one run) scores 0.508 vs.\ 0.509 (voxel) and 0.570 (image fit), 5L93 crossing 15.6\,\AA.
 % src: runs/native_limited250_20261103/control_v4_outcome.json; map_only_control_v4/score/results.json
 Three earlier versions missed the adequacy requirement (relative $L_2$ $<$0.10: 1.15, 0.88, 0.96), as 97\,\% of the target's power beyond 8\,\AA\ is noise; the control supports, not proves, an image-fit gain.
 % src: runs/native_limited250_20261103/map_only_control/decision.json (1.1506); controls_v2_outcome.json (0.883); control_v3_outcome.json (0.956; power beyond 8 A 0.973)
 Smoothing the voxel-250 maps (low-pass 8--5.6\,\AA\ or B 50--400\,\AA$^2$, best post hoc) gains at most 0.006 (B = 100\,\AA$^2$: 0.515, 0.483, 0.465 vs.\ Gaussian 0.570, 0.566, 0.518) and shifts the 5L93 crossing by $\le$0.23\,\AA.
 % src: docs/paper/lowpass_control_summary.json; scripts/lowpass_control.py (unfiltered 0.509/0.479/0.461 reproduced)
 
-\paragraph{Five-draw study.}
-Five disjoint 250-particle draws (nested in 500, 200 reserved) compare raw-image Gaussian fits with a ridge-regularized voxel solver and map-only Gaussian fits.
+The five-draw study uses five disjoint 250-particle draws (nested in 500, 200 reserved) compare raw-image Gaussian fits with a ridge-regularized voxel solver and map-only Gaussian fits.
 % src: docs/results-stags-next-evaluation.md (particle-efficiency study)
 Over 6.5--5.6\,\AA\ the Gaussian map exceeds voxel-250 by 0.175 (95\,\% CI [0.146, 0.203]) and the map-only fit by 0.137 [0.105, 0.169]; at 6.5\,\AA\ it exceeds voxel-500 by 0.095 [0.064, 0.125].
 % src: runs/particle_efficiency_20261102/results.json (comparisons A250, AG250, A500)

@@ -43,8 +43,7 @@ Inputs are RELION's tilt-series alignment, CTFFIND defocus, per-tilt scales and 
 Crops are extracted by \texttt{relion\_tomo\_subtomo} (216\,px at bin 2 up to 6.5\,\AA; 384\,px at bin 1 for 5.5\,\AA\ and, without CTF multiplication, for the optics scan; 192\,px at bin 1 for map fits and refinement), using only $|\bm{\kappa}|\le1/d$.
 % code: stags/engine.py:extract, HalfData.set_grid; scripts/lean_chain.py:main (initial extraction bin 2, box 256, crop 216), ladder_config (reextract bin 1, box 512, crop 384); runs/engine/runC/run_c.py:prep_half (crop 192; no_ctf crop RAW_CROP = 384), cycle_E (re-extraction crop 192)
 
-\paragraph{Optics.}
-In \mainref{eq:slice}, $A_{ij}=\Gamma_{ij}R_i$ and $\mathbf{u}_{ij}=\Pi\,\Gamma_{ij}\mathbf{t}_i+\bm{\delta}_{ij}$, with $\Pi=[I_2\;\mathbf{0}]$, $\Gamma_{ij}$ the tilt rotation relative to the particle's first image and $\bm{\delta}_{ij}$ the motion shifts. The CTF is
+The optics follow \mainref{eq:slice}, where $A_{ij}=\Gamma_{ij}R_i$ and $\mathbf{u}_{ij}=\Pi\,\Gamma_{ij}\mathbf{t}_i+\bm{\delta}_{ij}$, with $\Pi=[I_2\;\mathbf{0}]$, $\Gamma_{ij}$ the tilt rotation relative to the particle's first image and $\bm{\delta}_{ij}$ the motion shifts. The CTF is
 \begin{equation}
 \begin{aligned}
 c_{ij}(\bm{\kappa})&=-\beta_j\big[\sqrt{1-w_a^2}\sin\chi_{ij}+w_a\cos\chi_{ij}\big],\\
@@ -57,8 +56,7 @@ with per-tilt scale $\beta_j$ and defocus $\Delta f_{ij}(\varphi)$ combining mea
 The exposure filter is $e_j(\bm{\kappa})=\exp(-N_j/2N_e)$ with $N_e=0.245|\bm{\kappa}|^{-1.665}+2.81$~\cite{grant2015dose} at the midpoint exposure $N_j$ of tilt $j$.
 % code: stags/relion5_io.py:_ctf_parts, wavelength (depth offset, dose = pre + 0.5 dose_per_tilt); stags/optics.py
 
-\paragraph{Likelihood on CTF-premultiplied crops.}
-Extracted crops are $\tilde{y}_{ij}=c_{ij}e_jy_{ij}$.
+The likelihood is evaluated on CTF-premultiplied crops: extracted crops are $\tilde{y}_{ij}=c_{ij}e_jy_{ij}$.
 With $T_{ij}=(c_{ij}e_j)^2$, \mainref{eq:like} equals, up to a model-independent term,
 \begin{equation}
 \mathcal{L}=\sum_{i,j,\bm{\kappa}\neq0}\eta\,w\Big[T_{ij}|P_{ij}|^2-2\operatorname{Re}\big(\overline{P_{ij}}\,\tilde{y}_{ij}\big)\Big],
@@ -72,14 +70,12 @@ The weight $w$ is $\sum T/\sum|\tilde{y}|^2$ per one-pixel shell of the half's i
 \subsection{Initialization, densification and masks}
 \label{sec:suppl:method:init}
 
-\paragraph{Seed.}
-Each half back-projects 250 particles at their pick poses (C6 Wiener) and low-passes the map to 40\,\AA; isotropic Gaussians of width $d/3$ are sampled in proportion to squared positive density inside 250\,\AA, and one global amplitude is fitted in closed form.
+To seed the mixture, each half back-projects 250 particles at their pick poses (C6 Wiener) and low-passes the map to 40\,\AA; isotropic Gaussians of width $d/3$ are sampled in proportion to squared positive density inside 250\,\AA, and one global amplitude is fitted in closed form.
 % code: stags_engine.py:main (backproject band_A 16; lowpass 40); stags/engine.py:lowpass, initial_model, fit_amplitude; stags/train.py:seeds_from_volume; stags/relion5_io.py:reconstruct
 The seed runs the 16\,\AA\ level on these particles until the map's non-cylindrical (lattice) fraction exceeds 0.12 and is stable (round 9 on both halves); the ladder then restarts from the pick poses.
 % code: scripts/lean_chain.py:seed_config (rounds 30, lattice_stable delta 0.01, rounds 3), runs/engine/runC/run_c.py:run_ladder (--seed_lattice 0.12); stags/engine.py:noncylindrical_fraction; src: runs/engine/pose_abc_adopt_20261113/blind/lean/seed/h{1,2}/summary.json
 
-\paragraph{Densification.}
-At level $d$ the target is $K(d)=\operatorname{round}(0.7\,V/(d/2)^3)$ (cap 50,000, never binding), from 1,061 at 16\,\AA\ to 26,119 at 5.5\,\AA.
+Densification sets the target at level $d$ to $K(d)=\operatorname{round}(0.7\,V/(d/2)^3)$ (cap 50,000, never binding), from 1,061 at 16\,\AA\ to 26,119 at 5.5\,\AA.
 % code: stags/engine.py:k_target_total; scripts/lean_chain.py (MASK_VOLUME_A3, K_CAP = 50000)
 % src: scripts/lean_chain.py:45 (MASK_VOLUME_A3 = 775994.93); runs/engine/pose_abc_adopt_20261113/blind/lean/ladder/h{1,2}/summary.json (levels[].K_total)
 At each level change, Gaussians lighter than 1\% of the median mass or outside the support are pruned; the widest Gaussians with $s_{\max}>d/3$ are then split, widest first, into two children at $\bm{\mu}\pm0.6\,s_{\max}\mathbf{v}$ along the long axis $\mathbf{v}$, with that width scaled by 0.8 and half the mass, until the target is reached; finally the heaviest $K(d)$ are kept.
@@ -87,15 +83,13 @@ At each level change, Gaussians lighter than 1\% of the median mass or outside t
 The fixed-pose fit starts with $K=48{,}000$, seeded likewise from the masked back-projection at the 5.5\,\AA\ poses.
 % code: runs/engine/night_20261110/night.py:fit_cmd (--K 48000 --init voxel); stags/relion5_stags.py (init == "voxel": seeds_from_volume(VA * mask, lowpass_A 16); fit_scale kmax 1/20; init_model: no amplitude refit)
 
-\paragraph{Mask.}
-$M$ is a cylinder about the symmetry axis whose height comes from the axial profile of the half's own back-projection at the 5.5\,\AA\ poses and whose radius makes it contain $V$, with a 6\,\AA\ cosine edge.
+The particle mask $M$ is a cylinder about the symmetry axis whose height comes from the axial profile of the half's own back-projection at the 5.5\,\AA\ poses and whose radius makes it contain $V$, with a 6\,\AA\ cosine edge.
 % EMPIAR-11830 (removed, re-add with the table column): For EMPIAR-11830, $M$ is instead the half's Gaussian map at the end of the ladder, low-passed to 8\,\AA\ and thresholded to the support volume $V$ (\cref{tab:suppl:datasets}), keeping the largest connected component, with a 6\,\AA\ cosine edge.
 % code: scripts/dataset_final.py:model_mask
 $V_{\mathrm{out}}=V_A(1-M)$ is recomputed at the current poses by every later stage.
 % code: runs/engine/runC/run_c.py:prep_half (backproject wiener 0.05, sym C6, kmax 1/12); runs/engine/night_20261110/night.py:cylinder_mask_from_volume; stags/engine.py:HalfData.use_mask("sphere", 250); src: runs/engine/pose_abc_adopt_20261113/blind/kb/h1/prep.json (radius_A, fraction_of_box)
 
-\paragraph{Ladder.}
-\Cref{tab:suppl:ladder} lists the levels.
+\Cref{tab:suppl:ladder} lists the levels of the resolution ladder.
 The 16\,\AA\ search is global on a $10^\circ$ grid with exact projections, refined at $\pm5^\circ$ around the best 32; later levels score trilinear slices of a table of \mainref{eq:ft} around the previous top 32 and set the pose to the top candidate.
 At 16 and 12\,\AA\ the halves share their transforms at $|\mathbf{q}|\le1/40$\,\AA$^{-1}$.
 Map fits use Adam~\cite{kingma2015adam} (batches of 6 particles) over the top-$k$ candidates with renormalized posterior weights.

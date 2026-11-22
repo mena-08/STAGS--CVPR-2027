@@ -1,7 +1,6 @@
 \section{Second dataset: EMPIAR-10491}
 \label{sec:suppl:dataset2}
 
-\paragraph{Data and protocol.}
 We repeat the fixed-pose comparison on human apoferritin (EMPIAR-10491, symmetry O): the five tilt series of WarpTools' end-to-end example (41 tilts each, 0.7894\,\AA/px, 2.64\,e$^-$/\AA$^2$ per tilt), processed with WarpTools 2.0.0dev33 and RELION-5.0.1 as in that example, stopping before M.
 % src: runs/dataset10491_20261121/reference_e2e.sh (warpem/warp scripts/EMPIAR-10491_5TS_e2e.sh: --angpix 0.7894, --exposure 2.64); runs/dataset10491_20261121/raw/verify.txt (205 frame files + gain, sizes equal to the server's); runs/dataset10491_20261121/raw/mdoc/TS_*.mrc.mdoc (41 SubFramePath entries each)
 % src: runs/dataset10491_20261121/03_warp.sh; runs/dataset10491_20261121/logs/02_warp_install.log (warp-2.0.0dev33); runs/dataset10491_20261121/RUNLOG.txt
@@ -40,7 +39,6 @@ RELION-5 & 4.50 & 6.00 & 0.888 & 0.499 & 0.143 \\
 
 \input{fig/fig_supp_dataset2}
 
-\paragraph{Results and limitations.}
 The Gaussian maps agree better with the opposite RELION half at 8--6\,\AA\ (except half~2 at 6\,\AA) but cross 0.143 at the same resolution as the voxel and RELION maps (\cref{tab:suppl:dataset2,fig:suppl:dataset2}): no resolution gain.
 % src: runs/dataset10491_20261121/supp_dataset2_numbers.json (gaussian / voxel fsc_at 8, 6)
 % src: runs/dataset10491_20261121/stags/score_B/results.json, score_A/results.json (crossings_A.mask_corrected 0.143: 4.535 / 4.624, 4.516 / 4.511, relion_gold 4.501)
