@@ -15,6 +15,7 @@ As in \mainref{sec:results:efficiency}, RELION's poses, optics and mask are fixe
 The voxel map is our Wiener reconstruction, which reproduces RELION's half map at FSC 0.9999 at 8\,\AA.
 % src: runs/dataset10491_20261121/stags/roundtrip.json (gate pass; fsc_same_half_8A 0.99990 / 0.99986; relion5 true; confirmation pass)
 
+\input{fig/fig_supp_dataset2}
 \begin{table}[!htb]
 \centering
 \footnotesize
@@ -36,8 +37,6 @@ RELION-5 & 4.50 & 6.00 & 0.888 & 0.499 & 0.143 \\
 \caption{\textbf{EMPIAR-10491 at fixed RELION-5 poses.} Mask-corrected FSC of the half-1 / half-2 maps against the opposite RELION-5 half map; RELION-5: its own half 1 against half 2. Same particles, poses, mask and scorer for every row.}
 \label{tab:suppl:dataset2}
 \end{table}
-
-\input{fig/fig_supp_dataset2}
 
 The Gaussian maps agree better with the opposite RELION half at 8--6\,\AA\ (except half~2 at 6\,\AA) but cross 0.143 at the same resolution as the voxel and RELION maps (\cref{tab:suppl:dataset2,fig:suppl:dataset2}): no resolution gain.
 % src: runs/dataset10491_20261121/supp_dataset2_numbers.json (gaussian / voxel fsc_at 8, 6)
