@@ -15,6 +15,9 @@
 \renewcommand{\theHtable}{S\arabic{table}}
 \renewcommand{\theHfigure}{S\arabic{figure}}
 \renewcommand{\theHequation}{S\arabic{equation}}
+% Supplement-only float rules: let tables sit on the page of their text instead of queuing behind the figures.
+\setcounter{topnumber}{4}\setcounter{bottomnumber}{3}\setcounter{totalnumber}{6}
+\renewcommand{\topfraction}{0.95}\renewcommand{\bottomfraction}{0.6}\renewcommand{\textfraction}{0.05}\renewcommand{\floatpagefraction}{0.85}
 
 \input{sec/X_suppl_method}
 
@@ -38,10 +41,9 @@ The RELION-5 paper does not list the regions of its Fig.~6C; for \mainref{fig:cl
 % src: docs/paper/fig_abc_fig6c_regions.json; docs/final-campaign-nov13.md (Visual comparison)
 
 \input{fig/fig_views}
-\input{fig/fig_supp_zooms}
-\input{fig/fig_slices}
 
 \input{sec/X_suppl_timing}
+\input{fig/fig_supp_zooms}
 
 \section{Pose-correction ablation}
 \label{sec:suppl:ablation}
@@ -56,6 +58,7 @@ Exact scoring inside rotation-candidate ranking did not improve on a+b+c (0.064/
 a+b+c beats the control at every 3.6--3.28\,\AA\ shell; its failed gate is not reclassified.
 % src: docs/final-campaign-nov13.md (Explicit post-result adoption: +0.016170/+0.017196); runs/engine/pose_rank_exact_20261113/curve_diagnosis.json
 
+\input{fig/fig_slices}
 \section{Fixed-pose particle efficiency: details}
 \label{sec:suppl:efficiency}
 
@@ -96,7 +99,7 @@ Such proxies vary by about $\pm$0.02--0.03\,\AA, seen as opposite-sign gains on 
 Two rejections were overridden after the result ($^\dagger$): the 5.5\,\AA\ schedule stop, after a later fresh run gave 3.881/3.886\,\AA\ and run-to-run spread was seen to be $\sim$0.1\,\AA; and the revised optics scan, because the old scan failed a known-answer test (225 vs.\ 397\,\AA\ recovered for a true 400\,\AA\ defocus offset) and the new one halves the deviation from RELION's defocus (118/141 vs.\ 221/217\,\AA).
 % src: docs/final-campaign-nov13.md (stage1_ladder caveat_recorded_after and decision_revised_after; stage4_scan known_answer_h1, relion_diagnostic, DEVIATION recorded after the result)
 
-\begin{table}[h]
+\begin{table}[!htb]
 \centering
 \resizebox{\linewidth}{!}{%
 \begin{tabular}{@{}llccl@{}}

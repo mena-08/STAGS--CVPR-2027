@@ -12,6 +12,9 @@ Picks to final map take 4.27\,h and 4.39\,h (\cref{tab:suppl:stages}), both incl
 To fit the 24\,GB cards, observations stay in pinned host memory and every stage sizes its chunks from a 22\,GB per-process budget (ladder peak 19.4--19.5\,GB per half vs.\ 46.5--46.6\,GB uncapped); the computation is unchanged.
 % src: stags/relion5_stags.py (pin_memory store); stags/gpu_budget.py (STAGS_GPU_MEM_GB cap, budget_bytes for chunk sizing); runs/engine/abc_4090_20261117/launch.json (STAGS_GPU_MEM_GB 22); docs/paper/supp_timing_numbers.json (peak_gpu_GB_per_half, runs 1 and 2), from lean/logs/ladder_h{1,2}.log 'peak GPU' lines
 
+\input{fig/tab_supp_stages}
+\input{fig/tab_supp_runs}
+
 Run~2 allows a same-hardware comparison: on $2\times$ RTX 4090, RELION-5~\cite{burt2024relion5} reports 13\,h\,04\,min from the picks to its first bin-1 map (4.0\,\AA) and 3\,h\,22\,min per polishing cycle, ${\sim}29.9$\,h for the five cycles that reach 3.3\,\AA\ (our sum; times from their table, not re-measured).
 % src: docs/relion5-paper-table4.md (13 h 4 min; 3 h 22 min; 512 GB RAM; 4.0 A, 3.3 A after five iterations); docs/paper/supp_timing_numbers.json (relion_table4_h.five_cycles_total_our_sum 29.9)
 STAGS's measured 4.39\,h is $3.0\times$ and $6.8\times$ shorter, with half their host RAM (251 vs.\ 512\,GB), and below the 6.5--7.5\,h the main paper estimates for this hardware.
@@ -45,5 +48,3 @@ Its seed stage needs 24 instead of 9 rounds on half~1, so the stage-time gate ab
 % src: docs/paper/supp_speed_numbers.json (k_scale_seed: rounds half 1 24 in all three attempts vs 9 in run 1; aborted[*].abort: step2_16_12 half 2 stage time > 1.5 x budget); runs/engine/supp_speed_20261121/k_scale_0.5/launch.json (--ladder_budget); engine_rules.json steps.supp_speed_20261121.incidents (correction: not GPU contention)
 With one run each, neither variant changes the recipe of the main paper.
 
-\input{fig/tab_supp_stages}
-\input{fig/tab_supp_runs}

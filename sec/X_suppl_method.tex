@@ -4,7 +4,7 @@
 Values are those of the EMPIAR-10164 run; notation follows \mainref{sec:method}.
 \Cref{tab:suppl:datasets} lists the only dataset-specific settings.
 
-\begin{table}[t]
+\begin{table}[!htb]
 \centering
 \footnotesize
 \caption{\textbf{Dataset-specific settings} (EMPIAR-10164). $D$: particle diameter for the angular cap $d/D$; $V$: support volume that sets $K$ and the mask volume.}
@@ -97,7 +97,7 @@ Map fits use Adam~\cite{kingma2015adam} (batches of 6 particles) over the top-$k
 % code: stags_engine.py:main (R0, t0 = Rk[:,0], tk[:,0]); stags/engine.py:join_partner; stags/engine_search.py (F[|k| <= 1/40] = 0.5 (own + other)); stags/slice_render.py:blend_low
 % code: stags/engine.py:fit_soft, PlateauRule, _sample_rows; scripts/lean_chain.py:LADDER (max passes, tilt fraction 0.5)
 
-\begin{table}[t]
+\begin{table}[!htb]
 \centering
 \footnotesize
 \caption{\textbf{Resolution ladder.} Rotation step, E-steps, candidates per map fit and shift radius/step.}
