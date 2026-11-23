@@ -1,0 +1,28 @@
+% Standalone supplementary material (own page and line numbers from 1).
+% In Overleaf: Menu -> Main document -> supplementary.tex, then Recompile; switch back to main.tex for the paper.
+% "Eq. (3) of the main paper"-style references come from main.aux via xr-hyper; latexmkrc compiles main.tex
+% first when main.aux is missing or stale, so both work in Overleaf and with a local `latexmk -pdf supplementary.tex`.
+
+\documentclass[10pt,twocolumn,letterpaper]{article}
+\usepackage[review]{cvpr}
+\input{preamble}
+
+\definecolor{cvprblue}{rgb}{0.21,0.49,0.74}
+\usepackage{xr-hyper}
+\usepackage[pagebackref,breaklinks,colorlinks,allcolors=cvprblue]{hyperref}
+\externaldocument[]{main}
+
+\def\confName{CVPR}
+\def\confYear{2027}
+
+\title{STAGS: Subtomogram Averaging with Gaussian Splatting}
+
+\begin{document}
+\input{sec/X_suppl}
+
+{
+    \small
+    \bibliographystyle{ieeenat_fullname}
+    \bibliography{main}
+}
+\end{document}
