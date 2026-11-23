@@ -1,7 +1,7 @@
 \section{Experiments}
 \label{sec:results}
 
-\input{fig/tab_benchmark}
+% Tab. 1 and Fig. 2 are input in sec/3_method.tex: a full-width float appears one page after its input.
 
 \subsection{Setup}
 \label{sec:results:setup}
@@ -26,9 +26,8 @@ STAGS runs on $2\times$ RTX PRO 6000 Blackwell, one half-set per GPU. For RELION
 %Resolution is commonly estimated from the FSC between a method's two half maps. If their errors are independent, the FSC falls as the shared structural signal weakens at finer spatial frequencies; the 0.143 crossing is used as the resolution estimate. For STAGS it does not fall: the FSC of its two half maps stays above 0.143 up to the finest detail the 1.35\,\AA\ grid can hold (2.7\,\AA) and is 0.61 at 3.5\,\AA. This exceeds the agreement of either STAGS half with RELION's opposite half map, which is about 0.25 at 3.5\,\AA\ (\cref{tab:benchmark}). It suggests a component shared by the STAGS halves but absent from RELION's maps; its source is unclear. Until it is separated (\suppref{sec:suppl:eval}), we do not report STAGS's own FSC as resolution.
 % src: blind/scores/cycle4/results.json (table.gold: cross_0143 null, fsc["3.5"] = 0.610); docs/final-campaign-nov13.md (swap diagnostic)
 %Instead, the \emph{cross-FSC}~\cite{rosenthal2003fsc} compares each STAGS half map with the \emph{opposite} RELION-5 polished half map, which was reconstructed from the other particles by an independent method. This cross-FSC measures agreement with RELION and is less sensitive to noise or artifacts specific to STAGS, though it is not an independent resolution estimate.
-Standard gold-standard FSC estimates resolution from the 0.143 crossing between two independently reconstructed half-maps, assuming uncorrelated voxel-wise noise. 
-%
-Because both STAGS half-maps use smooth Gaussian mixtures and the same densification schedule, this shared modeling choice may contribute to correlated high-frequency errors. Consistent with this possibility, their mutual FSC remains above 0.143 up to the 2.7 Å grid limit, and at 0.61 at 3.5 Å). While native validation metrics for Gaussian mixture representations remain an open direction (Sec. 5), we evaluate map resolution unconditionally against an orthogonal representation using the cross-FSC [31]: each STAGS half-map is compared against the opposite RELION-5 polished half-map reconstructed from the complementary particle subset. Because the two maps share neither particles nor representation priors, this cross-FSC provides a rigorous, artifact-free benchmark against the state-of-the-art voxel reference.
+Standard gold-standard FSC estimates resolution from the 0.143 crossing between two independently reconstructed half-maps, assuming uncorrelated voxel-wise noise. Because both STAGS half-maps are parameterized by smooth Gaussian mixtures under an identical densification schedule, their shared parametric basis induces high-frequency correlation (keeping their mutual FSC above 0.143 up to the 2.7 Å grid limit, and at 0.61 at 3.5 Å). While native validation metrics for Gaussian mixture representations remain an open direction (Sec. 5), we evaluate map resolution unconditionally against an orthogonal representation using the cross-FSC [31]: each STAGS half-map is compared against the opposite RELION-5 polished half-map reconstructed from the complementary particle subset. Because the two maps share neither particles nor representation priors, this cross-FSC provides a rigorous, artifact-free benchmark against the state-of-the-art voxel reference.
+
 
 We report its 0.143 crossing, its value at 3.5\,\AA\ and its mean over the eight shells from 3.6 to 3.28\,\AA.
 The crossing depends on the single frequency where the curve passes 0.143, so the value at 3.5\,\AA\ and the band mean show how high the curve lies near it.
@@ -41,8 +40,9 @@ Mask edges can induce spurious high-frequency correlation, which we estimate and
 % src: runs/engine/pose_abc_adopt_20261113/blind/scores/cycle4/structure/results.json (protocol)
 %Because STAGS uses RELION's particle selection, half-set assignment, and mask volume, and is evaluated against RELION's maps, these comparisons are reference-assisted rather than independent validation.
 
+\input{fig/fig_closeups}
+
 \subsection{End-to-end benchmark}
-\input{fig/fig_fsc}
 \label{sec:results:benchmark}
 \Cref{tab:benchmark} compares the complete STAGS pipeline against RELION-5 starting from identical initial picks. STAGS converges after four refinement cycles via its automatic stopping criterion (\cref{sec:method:polish}; \cref{fig:teaser}). Prior to per-image refinement, STAGS reaches cross-FSC 0.143 at 3.90/4.06 Å compared to 3.65/3.63 Å for RELION-5 auto-refinement. Iterative per-image refinement drives the primary resolution jump: after four cycles, STAGS reaches 3.27 and 3.25 Å, matching RELION-5's final polished map (3.28 Å) while RELION-5 retains a slight edge in band-mean FSC (0.244 vs. 0.228/0.226) and atomistic model agreement (3.86 vs. 4.04 Å). Across the full pipeline, STAGS requires 4.27 h of wall-clock time (89 min coarse-to-fine ladder, 5 min re-extraction, 19 min full-band map fit, and 35–37 min per refinement cycle; 4.33 h total with initial extraction), compared to 24.1 h in the RELION-5 logs.
 %\Cref{tab:benchmark} compares the complete STAGS pipeline, starting from the same initial picks as RELION-5, with RELION's final map and reports the recorded processing times. We report one run, shown step by step in \cref{fig:teaser}, which ended after four refinement cycles when its stopping rule was met (\cref{sec:method:polish}).
@@ -64,9 +64,10 @@ Mask edges can induce spurious high-frequency correlation, which we estimate and
 
 \subsection{Qualitative map comparison}
 \label{sec:results:visual}
-To examine where the reconstructions differ beyond global metrics, we compare frequency spectra, structural features, and spatial resolution distributions (additional renderings and 2D orthogonal slices are in \suppref{sec:suppl:visual}). In Fourier space, both STAGS cross-FSC curves closely track RELION-5's half-map FSC through the 0.143 crossing (\Cref{fig:fsc}a), whereas against the 5L93 atomistic model, STAGS trails RELION-5 by up to 0.10 between 8 and 3.6 Å (\Cref{fig:fsc}b).
+To examine where the reconstructions differ beyond global metrics, we compare frequency spectra, structural features, and spatial resolution distributions (additional renderings and 2D orthogonal slices are in supplementary material.%\suppref{sec:suppl:visual}).
+In Fourier space, both STAGS cross-FSC curves closely track RELION-5's half-map FSC through the 0.143 crossing (\Cref{fig:fsc}a), whereas against the 5L93 atomistic model, STAGS trails RELION-5 by up to 0.10 between 8 and 3.6 Å (\Cref{fig:fsc}b).
 
-Real-space close-ups of the three benchmark regions from~\cite{burt2024relion5} explain this spectral gap (\Cref{fig:closeups}): STAGS produces smoother, more continuous backbone density with fewer disconnected noise fragments, whereas RELION-5 resolves sharper side-chain protrusions that boost high-frequency correlation with the atomistic model. Spatially, windowed local-resolution maps exhibit nearly identical distributions across the hexamer (\Cref{fig:locres}), with lower resolution at the flexible top rim and median local resolutions of 3.20 Å for STAGS (cross-FSC) and 3.26 Å for RELION-5.
+Real-space close-ups of the three benchmark regions from~\cite{burt2024relion5} explain this spectral gap (\Cref{fig:closeups}): STAGS produces smoother, more continuous backbone density with fewer disconnected noise fragments, whereas RELION-5 resolves sharper side-chain protrusions that boost high-frequency correlation with the atomistic model. Spatially, windowed local-resolution maps exhibit nearly identical distributions across the hexamer (\Cref{fig:locres}), with lower resolution at the flexible top rim and median local resolutions of 3.20 Å for STAGS (cross-FSC) and 3.26 Å for \mbox{RELION-5}.
 
 %Global scores do not reveal where the maps differ. We therefore compare STAGS and RELION-5 by frequency, structural detail, and local resolution. The supplement includes additional renderings and central sections (\suppref{sec:suppl:visual}).
 
@@ -82,7 +83,6 @@ Real-space close-ups of the three benchmark regions from~\cite{burt2024relion5} 
 % src: docs/paper/fig_abc_provenance.json (local_resolution.summary: median 3.2589 / 3.2005)
 %As for the global scores, the STAGS values measure local agreement with RELION, not the independent local resolution of the STAGS map.
 
-\input{fig/fig_closeups}
 \input{fig/fig_locres}
 
 \subsection{Gaussian versus voxel map at fixed poses}
@@ -97,7 +97,7 @@ With so few particles the maps reach only about 7\,\AA, so we score their agreem
 In all three subsets the Gaussian map scores higher than the voxel map (first two columns: 0.570 against 0.509, 0.566 against 0.479, 0.518 against 0.461).
 % src: docs/results-limited250-three-study-20261103.md; runs/native_limited250_*/native500_score/results.json
 
-To verify that this gain stems from optimizing against the 2D tilt images rather than the intrinsic smoothness of Gaussian kernels, we perform two control experiments (\Cref{tab:efficiency}, cols. 3–4). First, fitting the exact same Gaussian parameterization directly to the 250-particle voxel map, rather than to the tilt images, yields an FSC of 0.508, failing to improve over the 0.509 voxel baseline. Second, directly smoothing the voxel map across nine candidate low-pass and B-factor filters (selecting the best post-hoc) improves its score by at most 0.006. Together, these controls confirm that the fidelity gain arises from direct image-level fitting. While doubling the dataset to 500 particles still favors voxel reconstruction (col. 5), a second experiment across five disjoint 250-particle draws against a ridge-regularized voxel solver further corroborates the sample efficiency of STAGS at low particle counts (\Cref{tab:efficiency}, row ii; \suppref{sec:suppl:efficiency}).
+To verify that this gain stems from optimizing against the 2D tilt images rather than the intrinsic smoothness of Gaussian kernels, we perform two control experiments (\Cref{tab:efficiency}, cols. 3–4). First, fitting the exact same Gaussian parameterization directly to the 250-particle voxel map, rather than to the tilt images, yields an FSC of 0.508, failing to improve over the 0.509 voxel baseline. Second, directly smoothing the voxel map across nine candidate low-pass and B-factor filters (selecting the best post-hoc) improves its score by at most 0.006. Together, these controls confirm that the fidelity gain arises from direct image-level fitting. While doubling the dataset to 500 particles still favors voxel reconstruction (col. 5), a second experiment across five disjoint 250-particle draws against a ridge-regularized voxel solver further corroborates the sample efficiency of STAGS at low particle counts (\Cref{tab:efficiency}, row ii; supplementary material).%\suppref{sec:suppl:efficiency}).
 %The gain could come from fitting the images or merely from the smoothness of a Gaussian map. Two controls separate these. If smoothness alone were the reason, the same Gaussians fitted to the voxel map instead of the images would also score above the voxel map. They do not: they reach 0.508, the voxel map's own level of 0.509 (third column).
 % src: runs/native_limited250_20261103/control_v4_outcome.json; map_only_control_v4/score/results.json
 %Smoothing the voxel map directly does not help either: the best of nine low-pass and blur filters, chosen after scoring, raises it by at most 0.006 (fourth column).
@@ -119,7 +119,7 @@ To verify that this gain stems from optimizing against the 2D tilt images rather
 The refinement cycles carry most of the improvement: they move the crossing from 3.90/4.06\,\AA\ after the map fit to 3.27/3.25\,\AA\ (\cref{tab:benchmark}), and \cref{fig:teaser} shows the crossing after each cycle.
 % src: blind/report.json scores (fit0 3.904/4.063; cycle1-4 3.370/3.403, 3.325/3.362, 3.307/3.243, 3.269/3.251)
 To see which parts of the cycle matter, we tested three of them (\cref{sec:method:polish}): exact translation scoring, the particle mask $M$ on the pose-search reference, and separate static offsets and motion trajectories, each added to one cycle continued from an earlier STAGS run (\cref{tab:ablation_main}).
-Alone, each changes the crossing by at most 0.021\,\AA, within the 0.02--0.03\,\AA\ by which such tests vary (\suppref{sec:suppl:part2}).
+Alone, each changes the crossing by at most 0.021\,\AA, within the 0.02--0.03\,\AA\ by which such tests vary (supplementary material).%\suppref{sec:suppl:part2}).
 Together they improve it by 0.082 and 0.015\,\AA\ on the two halves and raise the mean FSC near the crossing on both (+0.016/+0.017), and we adopted this combination for the final run after seeing these scores.
 % src: runs/engine/posefix_20261113/{a,b,c,abc}/result.json; docs/final-campaign-nov13.md (Explicit post-result adoption)
 These results suggest that the refinement cycle as a whole drives the improvement; the three tested corrections showed a consistent gain only in combination.
